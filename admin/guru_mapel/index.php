@@ -5,7 +5,7 @@ requireRole('administrator');
 // Hapus mapping
 if (isset($_GET['delete'])) {
     $id = cleanInput($_GET['delete']);
-    $query = "DELETE FROM mapel_guru WHERE id_mapel_guru = $id";
+    $query = "DELETE FROM mapel_guru WHERE id = $id";
     if (mysqli_query($conn, $query)) {
         $success = "Mapping guru-mapel berhasil dihapus!";
     } else {
@@ -16,7 +16,7 @@ if (isset($_GET['delete'])) {
 // Filter dan Sort
 $search = isset($_GET['search']) ? cleanInput($_GET['search']) : '';
 $filterSemester = isset($_GET['semester']) ? cleanInput($_GET['semester']) : '';
-$sort = isset($_GET['sort']) ? cleanInput($_GET['sort']) : 'id_mapel_guru';
+$sort = isset($_GET['sort']) ? cleanInput($_GET['sort']) : 'id';
 $order = isset($_GET['order']) ? cleanInput($_GET['order']) : 'DESC';
 
 // Ambil data semester untuk dropdown
@@ -24,9 +24,9 @@ $semesterQuery = "SELECT id_semester, nama_semester FROM semester ORDER BY nama_
 $semesterResult = mysqli_query($conn, $semesterQuery);
 
 // Validasi kolom sort
-$allowedSort = ['id_mapel_guru', 'nama_lengkap', 'nama_mapel', 'nama_rombel', 'nama_semester'];
+$allowedSort = ['id', 'nama_lengkap', 'nama_mapel', 'nama_rombel', 'nama_semester'];
 if (!in_array($sort, $allowedSort)) {
-    $sort = 'id_mapel_guru';
+    $sort = 'id';
 }
 
 // Validasi order
@@ -167,8 +167,8 @@ $result = mysqli_query($conn, $query);
                                     <td><?php echo $row['nama_semester']; ?></td>
                                     <td>
                                         <div class="action-buttons">
-                                            <a href="edit.php?id=<?php echo $row['id_mapel_guru']; ?>" class="btn btn-warning btn-sm">Edit</a>
-                                            <a href="index.php?delete=<?php echo $row['id_mapel_guru']; ?>" 
+                                            <a href="edit.php?id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
+                                            <a href="index.php?delete=<?php echo $row['id']; ?>" 
                                                class="btn btn-danger btn-sm" 
                                                onclick="return confirm('Yakin ingin menghapus mapping ini?')">Hapus</a>
                                         </div>
