@@ -12,7 +12,8 @@
         <li><a href="<?php echo BASE_URL; ?>admin/users/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/users/') !== false ? 'active' : ''; ?>">👥 Manajemen User</a></li>
         <li><a href="<?php echo BASE_URL; ?>admin/jurusan/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/jurusan/') !== false ? 'active' : ''; ?>">🎓 Jurusan</a></li>
         <li><a href="<?php echo BASE_URL; ?>admin/rombel/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/rombel/') !== false ? 'active' : ''; ?>">🏫 Rombongan Belajar</a></li>
-        <li><a href="<?php echo BASE_URL; ?>admin/mapel/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/mapel/') !== false ? 'active' : ''; ?>">📚 Mata Pelajaran</a></li>
+        <li><a href="<?php echo BASE_URL; ?>admin/mapel/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/mapel/') !== false && strpos($_SERVER['PHP_SELF'], '/guru_mapel/') === false ? 'active' : ''; ?>">📚 Mata Pelajaran</a></li>
+        <li><a href="<?php echo BASE_URL; ?>admin/guru_mapel/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/guru_mapel/') !== false ? 'active' : ''; ?>">👨‍🏫 Jadwal Guru</a></li>
         <li><a href="<?php echo BASE_URL; ?>admin/siswa/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/siswa/') !== false ? 'active' : ''; ?>">👨‍🎓 Data Siswa</a></li>
         <li><a href="<?php echo BASE_URL; ?>admin/semester/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/semester/') !== false ? 'active' : ''; ?>">📅 Semester & TA</a></li>
         <li><a href="<?php echo BASE_URL; ?>admin/nilai/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/nilai/') !== false ? 'active' : ''; ?>">📝 Nilai Siswa</a></li>
