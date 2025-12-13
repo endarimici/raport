@@ -1,0 +1,70 @@
+# INSTALASI APLIKASI RAPORT SMK
+
+## Langkah-Langkah Instalasi:
+
+### 1. Pastikan XAMPP Sudah Terinstal
+   - Jika belum, download dan install XAMPP dari https://www.apachefriends.org/
+
+### 2. Start Apache dan MySQL
+   - Buka XAMPP Control Panel
+   - Klik tombol "Start" pada Apache
+   - Klik tombol "Start" pada MySQL
+
+### 3. Buat Database
+   - Buka browser, akses: http://localhost/phpmyadmin
+   - Klik tab "New" atau "Baru" untuk membuat database baru
+   - Nama database: `raport_smk`
+   - Klik "Create"
+
+### 4. Import Database
+   - Pilih database `raport_smk` yang baru dibuat
+   - Klik tab "Import"
+   - Klik "Choose File" dan pilih file `database.sql` dari folder raport
+   - Klik tombol "Go" atau "Kirim"
+   - Tunggu hingga proses import selesai
+
+### 5. Akses Aplikasi
+   - Buka browser
+   - Ketik: http://localhost/raport
+   - Anda akan masuk ke halaman login
+
+## Login Default:
+
+### Administrator:
+Username: admin
+Password: admin123
+
+### Guru:
+Username: guru1
+Password: guru123
+
+## Catatan Penting:
+
+1. Pastikan folder "raport" sudah ada di: C:\xampp82\htdocs\raport
+2. Jika path XAMPP Anda berbeda, sesuaikan lokasi folder
+3. Koneksi database sudah dikonfigurasi:
+   - Host: localhost
+   - Username: root
+   - Password: (kosong)
+   - Database: raport_smk
+
+## Troubleshooting:
+
+Jika terjadi error "Connection failed":
+1. Pastikan MySQL di XAMPP sudah running (warna hijau)
+2. Cek apakah database raport_smk sudah dibuat
+3. Pastikan file database.sql sudah di-import dengan benar
+
+Jika halaman tidak muncul:
+1. Pastikan Apache di XAMPP sudah running (warna hijau)
+2. Cek URL: http://localhost/raport (pastikan huruf kecil semua)
+
+## Setelah Instalasi:
+
+1. Login sebagai Administrator
+2. Tambahkan data master (Jurusan, Rombel, Mata Pelajaran, Semester)
+3. Tambahkan data siswa
+4. Tambahkan user guru
+5. Login sebagai Guru untuk input nilai
+
+Selamat menggunakan Aplikasi Raport SMK!
