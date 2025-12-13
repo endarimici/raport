@@ -96,11 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <button type="submit" class="btn btn-primary btn-block">Login</button>
             </form>
             
-            <div class="login-info">
-                <p><strong>Info Login:</strong></p>
-                <p>Admin - Username: admin | Password: admin123</p>
-                <p>Guru - Username: guru1 | Password: guru123</p>
-            </div>
+            
         </div>
     </div>
 </body>
