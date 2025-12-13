@@ -12,10 +12,40 @@ if (isset($_GET['delete'])) {
     }
 }
 
+// Filter dan Sort
+$search = isset($_GET['search']) ? cleanInput($_GET['search']) : '';
+$filterRombel = isset($_GET['rombel']) ? cleanInput($_GET['rombel']) : '';
+$sort = isset($_GET['sort']) ? cleanInput($_GET['sort']) : 'id_siswa';
+$order = isset($_GET['order']) ? cleanInput($_GET['order']) : 'DESC';
+
+// Ambil data rombel untuk dropdown
+$rombelQuery = "SELECT id_rombel, nama_rombel FROM rombel ORDER BY nama_rombel ASC";
+$rombelResult = mysqli_query($conn, $rombelQuery);
+
+// Validasi kolom sort
+$allowedSort = ['id_siswa', 'nis', 'nama_lengkap', 'jenis_kelamin', 'nama_rombel', 'status'];
+if (!in_array($sort, $allowedSort)) {
+    $sort = 'id_siswa';
+}
+
+// Validasi order
+$order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+
+// Query dengan filter dan sort
 $query = "SELECT s.*, r.nama_rombel 
           FROM siswa s 
           LEFT JOIN rombel r ON s.id_rombel = r.id_rombel 
-          ORDER BY s.id_siswa DESC";
+          WHERE 1=1";
+
+if (!empty($search)) {
+    $query .= " AND (s.nis LIKE '%$search%' OR s.nama_lengkap LIKE '%$search%')";
+}
+
+if (!empty($filterRombel)) {
+    $query .= " AND s.id_rombel = $filterRombel";
+}
+
+$query .= " ORDER BY " . ($sort === 'nama_rombel' ? 'r.nama_rombel' : 's.' . $sort) . " $order";
 $result = mysqli_query($conn, $query);
 ?>
 <!DOCTYPE html>
@@ -52,23 +82,66 @@ $result = mysqli_query($conn, $query);
                         <div class="alert alert-danger"><?php echo $error; ?></div>
                     <?php endif; ?>
                     
+                    <!-- Filter Form -->
+                    <div class="filter-section" style="margin-bottom: 20px;">
+                        <form method="GET" action="" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <input type="text" name="search" placeholder="Cari NIS atau Nama..." 
+                                   value="<?php echo htmlspecialchars($search); ?>" 
+                                   style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; flex: 1; max-width: 300px;">
+                            <select name="rombel" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 150px;">
+                                <option value="">Semua Rombel</option>
+                                <?php while ($rombel = mysqli_fetch_assoc($rombelResult)): ?>
+                                    <option value="<?php echo $rombel['id_rombel']; ?>" 
+                                            <?php echo $filterRombel == $rombel['id_rombel'] ? 'selected' : ''; ?>>
+                                        <?php echo $rombel['nama_rombel']; ?>
+                                    </option>
+                                <?php endwhile; ?>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">🔍 Cari</button>
+                            <?php if (!empty($search) || !empty($filterRombel)): ?>
+                                <a href="index.php" class="btn btn-secondary btn-sm">Reset</a>
+                            <?php endif; ?>
+                        </form>
+                    </div>
+                    
                     <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>NIS</th>
-                                    <th>Nama Lengkap</th>
-                                    <th>JK</th>
-                                    <th>Rombel</th>
-                                    <th>Status</th>
+                                    <th>
+                                        <a href="?search=<?php echo urlencode($search); ?>&rombel=<?php echo urlencode($filterRombel); ?>&sort=nis&order=<?php echo ($sort == 'nis' && $order == 'ASC') ? 'DESC' : 'ASC'; ?>" style="color: inherit; text-decoration: none;">
+                                            NIS <?php if($sort == 'nis') echo $order == 'ASC' ? '▲' : '▼'; ?>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a href="?search=<?php echo urlencode($search); ?>&rombel=<?php echo urlencode($filterRombel); ?>&sort=nama_lengkap&order=<?php echo ($sort == 'nama_lengkap' && $order == 'ASC') ? 'DESC' : 'ASC'; ?>" style="color: inherit; text-decoration: none;">
+                                            Nama Lengkap <?php if($sort == 'nama_lengkap') echo $order == 'ASC' ? '▲' : '▼'; ?>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a href="?search=<?php echo urlencode($search); ?>&rombel=<?php echo urlencode($filterRombel); ?>&sort=jenis_kelamin&order=<?php echo ($sort == 'jenis_kelamin' && $order == 'ASC') ? 'DESC' : 'ASC'; ?>" style="color: inherit; text-decoration: none;">
+                                            JK <?php if($sort == 'jenis_kelamin') echo $order == 'ASC' ? '▲' : '▼'; ?>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a href="?search=<?php echo urlencode($search); ?>&rombel=<?php echo urlencode($filterRombel); ?>&sort=nama_rombel&order=<?php echo ($sort == 'nama_rombel' && $order == 'ASC') ? 'DESC' : 'ASC'; ?>" style="color: inherit; text-decoration: none;">
+                                            Rombel <?php if($sort == 'nama_rombel') echo $order == 'ASC' ? '▲' : '▼'; ?>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a href="?search=<?php echo urlencode($search); ?>&rombel=<?php echo urlencode($filterRombel); ?>&sort=status&order=<?php echo ($sort == 'status' && $order == 'ASC') ? 'DESC' : 'ASC'; ?>" style="color: inherit; text-decoration: none;">
+                                            Status <?php if($sort == 'status') echo $order == 'ASC' ? '▲' : '▼'; ?>
+                                        </a>
+                                    </th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php 
                                 $no = 1;
-                                while ($row = mysqli_fetch_assoc($result)): 
+                                if (mysqli_num_rows($result) > 0):
+                                    while ($row = mysqli_fetch_assoc($result)): 
                                 ?>
                                 <tr>
                                     <td><?php echo $no++; ?></td>
@@ -93,7 +166,16 @@ $result = mysqli_query($conn, $query);
                                         </div>
                                     </td>
                                 </tr>
-                                <?php endwhile; ?>
+                                <?php 
+                                    endwhile;
+                                else: 
+                                ?>
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 20px;">
+                                        <?php echo !empty($search) ? 'Tidak ada data siswa yang sesuai dengan pencarian.' : 'Belum ada data siswa.'; ?>
+                                    </td>
+                                </tr>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
