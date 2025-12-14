@@ -5,7 +5,7 @@ requireRole('administrator');
 $id = cleanInput($_GET['id']);
 
 // Ambil data mapping yang akan diedit
-$query = "SELECT * FROM mapel_guru WHERE id_mapel_guru = $id";
+$query = "SELECT * FROM mapel_guru WHERE id = $id";
 $result = mysqli_query($conn, $query);
 $data = mysqli_fetch_assoc($result);
 
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                    AND id_mapel = '$id_mapel' 
                    AND id_rombel = $id_rombel 
                    AND id_semester = $id_semester
-                   AND id_mapel_guru != $id";
+                   AND id != $id";
     $checkResult = mysqli_query($conn, $checkQuery);
     
     if (mysqli_num_rows($checkResult) > 0) {
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                   id_mapel = '$id_mapel',
                   id_rombel = $id_rombel,
                   id_semester = $id_semester
-                  WHERE id_mapel_guru = $id";
+                  WHERE id = $id";
         
         if (mysqli_query($conn, $query)) {
             header("Location: index.php");

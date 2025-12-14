@@ -10,6 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nama_mapel = cleanInput($_POST['nama_mapel']);
     $kelompok = cleanInput($_POST['kelompok']);
     $kkm = cleanInput($_POST['kkm']);
+    $deskripsi_a = cleanInput($_POST['deskripsi_a']);
+    $deskripsi_b = cleanInput($_POST['deskripsi_b']);
+    $deskripsi_c = cleanInput($_POST['deskripsi_c']);
+    $deskripsi_d = cleanInput($_POST['deskripsi_d']);
     
     if (empty($kode_mapel) || empty($nama_mapel) || empty($kelompok)) {
         $error = 'Kode, nama, dan kelompok mata pelajaran harus diisi!';
@@ -20,8 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (mysqli_num_rows($result) > 0) {
             $error = 'Kode mata pelajaran sudah digunakan!';
         } else {
-            $query = "INSERT INTO mata_pelajaran (kode_mapel, nama_mapel, kelompok, kkm) 
-                      VALUES ('$kode_mapel', '$nama_mapel', '$kelompok', '$kkm')";
+            $query = "INSERT INTO mata_pelajaran (kode_mapel, nama_mapel, kelompok, kkm, deskripsi_a, deskripsi_b, deskripsi_c, deskripsi_d) 
+                      VALUES ('$kode_mapel', '$nama_mapel', '$kelompok', '$kkm', '$deskripsi_a', '$deskripsi_b', '$deskripsi_c', '$deskripsi_d')";
             
             if (mysqli_query($conn, $query)) {
                 $success = 'Mata pelajaran berhasil ditambahkan!';
@@ -91,6 +95,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <label for="kkm">KKM *</label>
                             <input type="number" id="kkm" name="kkm" class="form-control" 
                                    value="75" step="0.01" min="0" max="100" required>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <strong>Deskripsi Predikat Nilai:</strong><br>
+                            Isi deskripsi untuk setiap predikat yang akan muncul di rapor siswa.
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="deskripsi_a">Deskripsi Predikat A (86-100)</label>
+                            <textarea id="deskripsi_a" name="deskripsi_a" class="form-control" rows="3" 
+                                      placeholder="Contoh: Siswa menunjukkan pemahaman yang sangat baik dan mampu menerapkan konsep dengan sangat efektif."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="deskripsi_b">Deskripsi Predikat B (71-85)</label>
+                            <textarea id="deskripsi_b" name="deskripsi_b" class="form-control" rows="3"
+                                      placeholder="Contoh: Siswa menunjukkan pemahaman yang baik dan mampu menerapkan konsep dengan cukup efektif."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="deskripsi_c">Deskripsi Predikat C (56-70)</label>
+                            <textarea id="deskripsi_c" name="deskripsi_c" class="form-control" rows="3"
+                                      placeholder="Contoh: Siswa menunjukkan pemahaman yang cukup dan perlu lebih banyak latihan dalam menerapkan konsep."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="deskripsi_d">Deskripsi Predikat D (0-55)</label>
+                            <textarea id="deskripsi_d" name="deskripsi_d" class="form-control" rows="3"
+                                      placeholder="Contoh: Siswa perlu bimbingan lebih lanjut untuk memahami dan menerapkan konsep dasar."></textarea>
                         </div>
                         
                         <button type="submit" class="btn btn-primary">Simpan</button>
