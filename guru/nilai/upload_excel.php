@@ -38,54 +38,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file_excel'])) {
                 $table = $tables->item(0);
                 $rows = $table->getElementsByTagName('tr');
                 
-                // Cari info rombel dan mapel dari header
-                $rombel_name = '';
-                $mapel_name = '';
-                $guru_name = '';
+                // Cari metadata (ID_ROMBEL, ID_MAPEL, ID_GURU, ID_SEMESTER)
+                $id_rombel = '';
+                $id_mapel = '';
+                $id_guru_file = '';
+                $id_semester_file = '';
                 
                 for ($i = 0; $i < min(10, $rows->length); $i++) {
                     $row = $rows->item($i);
                     $cells = $row->getElementsByTagName('td');
-                    if ($cells->length >= 2) {
+                    if ($cells->length >= 8) {
                         $label = trim($cells->item(0)->nodeValue);
-                        $value = trim($cells->item(1)->nodeValue);
-                        
-                        if (strpos($label, 'Kelas') !== false || strpos($label, 'Rombel') !== false) {
-                            $rombel_name = str_replace(':', '', $value);
-                        } elseif (strpos($label, 'Mata Pelajaran') !== false) {
-                            $mapel_name = str_replace(':', '', $value);
-                        } elseif (strpos($label, 'Guru') !== false) {
-                            $guru_name = str_replace(':', '', $value);
+                        if ($label == 'ID_ROMBEL') {
+                            $id_rombel = trim($cells->item(1)->nodeValue);
+                            $id_mapel = trim($cells->item(3)->nodeValue);
+                            $id_guru_file = trim($cells->item(5)->nodeValue);
+                            $id_semester_file = trim($cells->item(7)->nodeValue);
+                            break;
                         }
                     }
                 }
                 
-                // Validasi guru
-                if (trim($guru_name) != trim($_SESSION['nama_lengkap'])) {
-                    $error = "File ini bukan milik Anda! File ini untuk guru: $guru_name";
+                // Validasi metadata ditemukan
+                if (empty($id_rombel) || empty($id_mapel) || empty($id_guru_file)) {
+                    $error = 'Format file tidak valid! Gunakan file Excel dari menu Download Excel.';
+                } elseif ($id_guru_file != $id_user) {
+                    $error = "File ini bukan milik Anda! File ini untuk guru dengan ID: $id_guru_file";
+                } elseif ($id_semester_file != $semester_aktif['id_semester']) {
+                    $error = 'File ini untuk semester yang berbeda!';
                 } else {
-                    // Cari id_rombel dan id_mapel
-                    $query_rombel = "SELECT id_rombel FROM rombel WHERE nama_rombel LIKE '%$rombel_name%' LIMIT 1";
-                    $result_rombel = mysqli_query($conn, $query_rombel);
-                    $rombel = mysqli_fetch_assoc($result_rombel);
+                    // Verifikasi guru mengajar di rombel dan mapel ini
+                    $check_guru = "SELECT * FROM mapel_guru 
+                                  WHERE id_user = $id_user 
+                                  AND id_rombel = $id_rombel 
+                                  AND id_mapel = $id_mapel";
+                    $result_check = mysqli_query($conn, $check_guru);
                     
-                    $query_mapel = "SELECT id_mapel FROM mata_pelajaran WHERE nama_mapel LIKE '%$mapel_name%' LIMIT 1";
-                    $result_mapel = mysqli_query($conn, $query_mapel);
-                    $mapel = mysqli_fetch_assoc($result_mapel);
-                    
-                    if (!$rombel || !$mapel) {
-                        $error = 'Data rombel atau mata pelajaran tidak ditemukan!';
+                    if (mysqli_num_rows($result_check) == 0) {
+                        $error = 'Anda tidak mengajar di rombel dan mata pelajaran ini!';
                     } else {
-                        // Verifikasi guru mengajar di rombel dan mapel ini
-                        $check_guru = "SELECT * FROM mapel_guru 
-                                      WHERE id_user = $id_user 
-                                      AND id_rombel = {$rombel['id_rombel']} 
-                                      AND id_mapel = {$mapel['id_mapel']}";
-                        $result_check = mysqli_query($conn, $check_guru);
-                        
-                        if (mysqli_num_rows($result_check) == 0) {
-                            $error = 'Anda tidak mengajar di rombel dan mata pelajaran ini!';
-                        } else {
                             // Parse data siswa - cari header row
                             $header_found = false;
                             $data_start = 0;
@@ -157,8 +148,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file_excel'])) {
                                                 // Cek apakah sudah ada
                                                 $check_nilai = "SELECT * FROM nilai 
                                                                WHERE id_siswa = {$siswa['id_siswa']} 
-                                                               AND id_mapel = {$mapel['id_mapel']} 
-                                                               AND id_semester = {$semester_aktif['id_semester']}";
+                                                               AND id_mapel = $id_mapel 
+                                                               AND id_semester = $id_semester_file";
                                                 $result_check_nilai = mysqli_query($conn, $check_nilai);
                                                 
                                                 if (mysqli_num_rows($result_check_nilai) > 0) {
@@ -174,14 +165,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file_excel'])) {
                                                                   predikat = '$predikat',
                                                                   id_guru = $id_user
                                                                   WHERE id_siswa = {$siswa['id_siswa']} 
-                                                                  AND id_mapel = {$mapel['id_mapel']} 
-                                                                  AND id_semester = {$semester_aktif['id_semester']}";
+                                                                  AND id_mapel = $id_mapel 
+                                                                  AND id_semester = $id_semester_file";
                                                 } else {
                                                     // Insert
                                                     $query_save = "INSERT INTO nilai (id_siswa, id_mapel, id_semester, 
                                                                   nilai_formatif_1, nilai_formatif_2, nilai_formatif_3, nilai_formatif_4, 
                                                                   nilai_sts, nilai_sas, nilai_akhir, predikat, deskripsi, id_guru) 
-                                                                  VALUES ({$siswa['id_siswa']}, {$mapel['id_mapel']}, {$semester_aktif['id_semester']}, 
+                                                                  VALUES ({$siswa['id_siswa']}, $id_mapel, $id_semester_file, 
                                                                   $f1, $f2, $f3, $f4, $sts, $sas, '$nilai_akhir', '$predikat', '', $id_user)";
                                                 }
                                                 
@@ -355,7 +346,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file_excel'])) {
                     <h4>Catatan Penting:</h4>
                     <ul>
                         <li>File Excel harus yang Anda download sendiri dari menu "Download Excel"</li>
-                        <li>Sistem akan memverifikasi nama guru di file dengan akun yang login</li>
+                        <li>File mengandung metadata tersembunyi (ID Rombel, Mapel, Guru, Semester)</li>
+                        <li>Sistem akan memverifikasi ID guru di file dengan akun yang login</li>
+                        <li>Hanya file dari semester aktif yang bisa diupload</li>
                         <li>Nilai akhir akan dihitung otomatis (rata-rata dari nilai yang diisi)</li>
                         <li>Biarkan kolom kosong atau isi dengan "-" untuk nilai yang tidak ada</li>
                         <li>Data yang sudah ada akan di-update dengan data baru</li>

@@ -47,6 +47,10 @@ if (isset($_GET['download']) && $filter_rombel && $filter_mapel && $semester_akt
     echo '<tr><td colspan="11" style="text-align:center;font-weight:bold;font-size:18px;">SMK MUHAMMADIYAH 8 PAKIS</td></tr>';
     echo '<tr><td colspan="11" style="text-align:center;font-weight:bold;font-size:16px;">DAFTAR NILAI SISWA</td></tr>';
     echo '<tr><td colspan="11"></td></tr>';
+    
+    // Metadata untuk upload (JANGAN DIHAPUS!)
+    echo '<tr style="display:none;"><td>ID_ROMBEL</td><td>' . $filter_rombel . '</td><td>ID_MAPEL</td><td>' . $filter_mapel . '</td><td>ID_GURU</td><td>' . $id_user . '</td><td>ID_SEMESTER</td><td>' . $semester_aktif['id_semester'] . '</td></tr>';
+    
     echo '<tr><td>Kelas/Rombel</td><td colspan="3">: ' . $rombel['nama_rombel'] . '</td><td>Semester</td><td colspan="3">: ' . $semester_aktif['nama_semester'] . '</td></tr>';
     echo '<tr><td>Mata Pelajaran</td><td colspan="3">: ' . $mapel['nama_mapel'] . '</td><td>KKM</td><td colspan="3">: ' . $mapel['kkm'] . '</td></tr>';
     echo '<tr><td>Guru</td><td colspan="3">: ' . $_SESSION['nama_lengkap'] . '</td><td>Tahun Ajaran</td><td colspan="3">: ' . $semester_aktif['tahun_ajaran'] . '</td></tr>';
