@@ -31,12 +31,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file_excel'])) {
             
             // Parse HTML table (karena file Excel kita sebenarnya HTML)
             $dom = new DOMDocument();
-            @$dom->loadHTML($file_content);
+            libxml_use_internal_errors(true); // Suppress warnings
+            $dom->loadHTML(mb_convert_encoding($file_content, 'HTML-ENTITIES', 'UTF-8'));
+            libxml_clear_errors();
             $tables = $dom->getElementsByTagName('table');
             
             if ($tables->length > 0) {
                 $table = $tables->item(0);
                 $rows = $table->getElementsByTagName('tr');
+                
+                // Debug: tampilkan info file
+                // $error = "Debug: Ditemukan " . $tables->length . " tabel, " . $rows->length . " baris";
                 
                 // Cari metadata (ID_ROMBEL, ID_MAPEL, ID_GURU, ID_SEMESTER)
                 $id_rombel = '';
@@ -218,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file_excel'])) {
                     
                 }
             } else {
-                $error = 'File tidak mengandung tabel data!';
+                $error = 'File tidak mengandung tabel data! Pastikan file yang diupload adalah file Excel yang didownload dari menu "Download Excel".';
             }
         }
     }
