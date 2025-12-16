@@ -223,6 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file_excel'])) {
         }
     }
 }
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
