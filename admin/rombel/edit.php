@@ -19,11 +19,15 @@ if (!$rombel) {
 $query_jurusan = "SELECT * FROM jurusan ORDER BY nama_jurusan";
 $result_jurusan = mysqli_query($conn, $query_jurusan);
 
+// Ambil data wali kelas (users dengan role wali_kelas)
+$query_wali = "SELECT id_user, nama_lengkap FROM users WHERE role = 'wali_kelas' AND status = 'aktif' ORDER BY nama_lengkap";
+$result_wali = mysqli_query($conn, $query_wali);
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nama_rombel = cleanInput($_POST['nama_rombel']);
     $id_jurusan = cleanInput($_POST['id_jurusan']);
     $tingkat = cleanInput($_POST['tingkat']);
-    $wali_kelas = cleanInput($_POST['wali_kelas']);
+    $id_wali_kelas = !empty($_POST['id_wali_kelas']) ? cleanInput($_POST['id_wali_kelas']) : 'NULL';
     $tahun_ajaran = cleanInput($_POST['tahun_ajaran']);
     
     if (empty($nama_rombel) || empty($id_jurusan) || empty($tingkat)) {
@@ -33,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                   nama_rombel = '$nama_rombel',
                   id_jurusan = '$id_jurusan',
                   tingkat = '$tingkat',
-                  wali_kelas = '$wali_kelas',
+                  id_wali_kelas = $id_wali_kelas,
                   tahun_ajaran = '$tahun_ajaran'
                   WHERE id_rombel = $id";
         
@@ -112,9 +116,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </div>
                         
                         <div class="form-group">
-                            <label for="wali_kelas">Wali Kelas</label>
-                            <input type="text" id="wali_kelas" name="wali_kelas" class="form-control" 
-                                   value="<?php echo $rombel['wali_kelas']; ?>">
+                            <label for="id_wali_kelas">Wali Kelas</label>
+                            <select id="id_wali_kelas" name="id_wali_kelas" class="form-control">
+                                <option value="">-- Pilih Wali Kelas --</option>
+                                <?php while ($wali = mysqli_fetch_assoc($result_wali)): ?>
+                                    <option value="<?php echo $wali['id_user']; ?>" 
+                                        <?php echo $wali['id_user'] == $rombel['id_wali_kelas'] ? 'selected' : ''; ?>>
+                                        <?php echo $wali['nama_lengkap']; ?>
+                                    </option>
+                                <?php endwhile; ?>
+                            </select>
                         </div>
                         
                         <div class="form-group">

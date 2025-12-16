@@ -12,9 +12,10 @@ if (isset($_GET['delete'])) {
     }
 }
 
-$query = "SELECT r.*, j.nama_jurusan 
+$query = "SELECT r.*, j.nama_jurusan, u.nama_lengkap as nama_wali_kelas 
           FROM rombel r 
           LEFT JOIN jurusan j ON r.id_jurusan = j.id_jurusan 
+          LEFT JOIN users u ON r.id_wali_kelas = u.id_user
           ORDER BY r.id_rombel DESC";
 $result = mysqli_query($conn, $query);
 ?>
@@ -75,7 +76,7 @@ $result = mysqli_query($conn, $query);
                                     <td><?php echo $row['nama_rombel']; ?></td>
                                     <td><?php echo $row['nama_jurusan']; ?></td>
                                     <td><?php echo $row['tingkat']; ?></td>
-                                    <td><?php echo $row['wali_kelas']; ?></td>
+                                    <td><?php echo $row['nama_wali_kelas'] ? $row['nama_wali_kelas'] : '-'; ?></td>
                                     <td><?php echo $row['tahun_ajaran']; ?></td>
                                     <td>
                                         <div class="action-buttons">

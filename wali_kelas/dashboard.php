@@ -6,8 +6,8 @@ requireRole('wali_kelas');
 $id_user = $_SESSION['user_id'];
 $nama_wali = $_SESSION['nama_lengkap'];
 
-// Hitung berapa banyak rombel yang diasuh (berdasarkan nama wali kelas di tabel rombel)
-$query_rombel = "SELECT COUNT(*) as total FROM rombel WHERE wali_kelas LIKE '%$nama_wali%'";
+// Hitung berapa banyak rombel yang diasuh (berdasarkan id_wali_kelas)
+$query_rombel = "SELECT COUNT(*) as total FROM rombel WHERE id_wali_kelas = $id_user";
 $result_rombel = mysqli_query($conn, $query_rombel);
 $total_rombel = mysqli_fetch_assoc($result_rombel)['total'];
 
@@ -15,7 +15,7 @@ $total_rombel = mysqli_fetch_assoc($result_rombel)['total'];
 $query_siswa = "SELECT COUNT(s.id_siswa) as total 
                 FROM siswa s 
                 INNER JOIN rombel r ON s.id_rombel = r.id_rombel 
-                WHERE r.wali_kelas LIKE '%$nama_wali%' AND s.status = 'aktif'";
+                WHERE r.id_wali_kelas = $id_user AND s.status = 'aktif'";
 $result_siswa = mysqli_query($conn, $query_siswa);
 $total_siswa = mysqli_fetch_assoc($result_siswa)['total'];
 
@@ -23,7 +23,7 @@ $total_siswa = mysqli_fetch_assoc($result_siswa)['total'];
 $query_list_rombel = "SELECT r.*, j.nama_jurusan 
                       FROM rombel r 
                       LEFT JOIN jurusan j ON r.id_jurusan = j.id_jurusan 
-                      WHERE r.wali_kelas LIKE '%$nama_wali%' 
+                      WHERE r.id_wali_kelas = $id_user
                       ORDER BY r.tingkat, r.nama_rombel";
 $result_list_rombel = mysqli_query($conn, $query_list_rombel);
 
