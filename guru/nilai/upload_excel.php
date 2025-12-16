@@ -214,15 +214,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file_excel'])) {
                             } else {
                                 $error = 'Format file tidak sesuai! Header tabel tidak ditemukan.';
                             }
-                        }
                     }
+                    
                 }
             } else {
                 $error = 'File tidak mengandung tabel data!';
             }
         }
     }
-}
 }
 ?>
 <!DOCTYPE html>
