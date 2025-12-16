@@ -11,6 +11,7 @@
         <li><a href="<?php echo BASE_URL; ?>guru/dashboard.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>">📊 Dashboard</a></li>
         <li><a href="<?php echo BASE_URL; ?>guru/nilai/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' && strpos($_SERVER['PHP_SELF'], '/nilai/') !== false ? 'active' : ''; ?>">📝 Input Nilai</a></li>
         <li><a href="<?php echo BASE_URL; ?>guru/nilai/download_excel.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'download_excel.php' ? 'active' : ''; ?>">💾 Download Excel</a></li>
+        <li><a href="<?php echo BASE_URL; ?>guru/nilai/upload_excel.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'upload_excel.php' ? 'active' : ''; ?>">📤 Upload Excel</a></li>
     </ul>
 </div>
 
