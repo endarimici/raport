@@ -124,6 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <select id="role" name="role" class="form-control" required>
                                 <option value="administrator" <?php echo $user['role'] == 'administrator' ? 'selected' : ''; ?>>Administrator</option>
                                 <option value="guru" <?php echo $user['role'] == 'guru' ? 'selected' : ''; ?>>Guru</option>
+                                <option value="wali_kelas" <?php echo $user['role'] == 'wali_kelas' ? 'selected' : ''; ?>>Wali Kelas</option>
                             </select>
                         </div>
                         

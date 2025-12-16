@@ -5,6 +5,8 @@ require_once 'config.php';
 if (isLoggedIn()) {
     if (hasRole('administrator')) {
         header("Location: admin/dashboard.php");
+    } elseif (hasRole('wali_kelas')) {
+        header("Location: wali_kelas/dashboard.php");
     } else {
         header("Location: guru/dashboard.php");
     }
@@ -51,6 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Redirect berdasarkan role
                 if ($user['role'] == 'administrator') {
                     header("Location: admin/dashboard.php");
+                } elseif ($user['role'] == 'wali_kelas') {
+                    header("Location: wali_kelas/dashboard.php");
                 } else {
                     header("Location: guru/dashboard.php");
                 }

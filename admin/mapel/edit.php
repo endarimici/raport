@@ -125,25 +125,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </div>
                         
                         <div class="form-group">
-                            <label for="deskripsi_a">Deskripsi Predikat A (86-100)</label>
+                            <label for="deskripsi_a">Deskripsi Predikat A (90-100)</label>
                             <textarea id="deskripsi_a" name="deskripsi_a" class="form-control" rows="3" 
                                       placeholder="Contoh: Siswa menunjukkan pemahaman yang sangat baik dan mampu menerapkan konsep dengan sangat efektif."><?php echo isset($mapel['deskripsi_a']) ? $mapel['deskripsi_a'] : ''; ?></textarea>
                         </div>
                         
                         <div class="form-group">
-                            <label for="deskripsi_b">Deskripsi Predikat B (71-85)</label>
+                            <label for="deskripsi_b">Deskripsi Predikat B (80-89)</label>
                             <textarea id="deskripsi_b" name="deskripsi_b" class="form-control" rows="3"
                                       placeholder="Contoh: Siswa menunjukkan pemahaman yang baik dan mampu menerapkan konsep dengan cukup efektif."><?php echo isset($mapel['deskripsi_b']) ? $mapel['deskripsi_b'] : ''; ?></textarea>
                         </div>
                         
                         <div class="form-group">
-                            <label for="deskripsi_c">Deskripsi Predikat C (56-70)</label>
+                            <label for="deskripsi_c">Deskripsi Predikat C (70-79)</label>
                             <textarea id="deskripsi_c" name="deskripsi_c" class="form-control" rows="3"
                                       placeholder="Contoh: Siswa menunjukkan pemahaman yang cukup dan perlu lebih banyak latihan dalam menerapkan konsep."><?php echo isset($mapel['deskripsi_c']) ? $mapel['deskripsi_c'] : ''; ?></textarea>
                         </div>
                         
                         <div class="form-group">
-                            <label for="deskripsi_d">Deskripsi Predikat D (0-55)</label>
+                            <label for="deskripsi_d">Deskripsi Predikat D (< 70)</label>
                             <textarea id="deskripsi_d" name="deskripsi_d" class="form-control" rows="3"
                                       placeholder="Contoh: Siswa perlu bimbingan lebih lanjut untuk memahami dan menerapkan konsep dasar."><?php echo isset($mapel['deskripsi_d']) ? $mapel['deskripsi_d'] : ''; ?></textarea>
                         </div>

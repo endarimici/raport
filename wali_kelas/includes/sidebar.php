@@ -4,12 +4,12 @@
     </button>
     <div class="sidebar-header">
         <h3>Raport SMK</h3>
-        <p>Guru Panel</p>
+        <p>Wali Kelas Panel</p>
     </div>
     
     <ul class="sidebar-menu">
-        <li><a href="<?php echo BASE_URL; ?>guru/dashboard.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>">📊 Dashboard</a></li>
-        <li><a href="<?php echo BASE_URL; ?>guru/nilai/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/nilai/') !== false ? 'active' : ''; ?>">📝 Input Nilai</a></li>
+        <li><a href="<?php echo BASE_URL; ?>wali_kelas/dashboard.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>">📊 Dashboard</a></li>
+        <li><a href="<?php echo BASE_URL; ?>wali_kelas/nilai/download.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'download.php' ? 'active' : ''; ?>">💾 Download Raport</a></li>
     </ul>
 </div>
 
