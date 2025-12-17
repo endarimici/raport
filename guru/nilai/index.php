@@ -131,6 +131,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Input Nilai - Aplikasi Raport SMK</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        .saving-indicator {
+            display: inline-block;
+            margin-left: 5px;
+            font-size: 12px;
+            color: #ff9800;
+        }
+        .save-success {
+            color: #4caf50 !important;
+        }
+        .save-error {
+            color: #f44336 !important;
+        }
+        .input-wrapper {
+            position: relative;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard">
@@ -276,56 +293,91 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
                                                     <small style="color: #666;">NIS: <?php echo $siswa['nis']; ?></small>
                                                 </td>
                                                 <td>
-                                                    <input type="number" 
-                                                           name="siswa[<?php echo $siswa['id_siswa']; ?>][formatif_1]" 
-                                                           class="form-control" 
-                                                           value="<?php echo $nilai ? $nilai['nilai_formatif_1'] : ''; ?>" 
-                                                           min="0" max="100" step="0.01" style="width: 80px;">
+                                                    <div class="input-wrapper">
+                                                        <input type="number" 
+                                                               name="siswa[<?php echo $siswa['id_siswa']; ?>][formatif_1]" 
+                                                               class="form-control nilai-input" 
+                                                               data-siswa="<?php echo $siswa['id_siswa']; ?>"
+                                                               data-field="formatif_1"
+                                                               value="<?php echo $nilai ? $nilai['nilai_formatif_1'] : ''; ?>" 
+                                                               min="0" max="100" step="0.01" style="width: 80px;">
+                                                        <span class="saving-indicator" id="status-<?php echo $siswa['id_siswa']; ?>-formatif_1"></span>
+                                                    </div>
                                                 </td>
                                                 <td>
-                                                    <input type="number" 
-                                                           name="siswa[<?php echo $siswa['id_siswa']; ?>][formatif_2]" 
-                                                           class="form-control" 
-                                                           value="<?php echo $nilai ? $nilai['nilai_formatif_2'] : ''; ?>" 
-                                                           min="0" max="100" step="0.01" style="width: 80px;">
+                                                    <div class="input-wrapper">
+                                                        <input type="number" 
+                                                               name="siswa[<?php echo $siswa['id_siswa']; ?>][formatif_2]" 
+                                                               class="form-control nilai-input" 
+                                                               data-siswa="<?php echo $siswa['id_siswa']; ?>"
+                                                               data-field="formatif_2"
+                                                               value="<?php echo $nilai ? $nilai['nilai_formatif_2'] : ''; ?>" 
+                                                               min="0" max="100" step="0.01" style="width: 80px;">
+                                                        <span class="saving-indicator" id="status-<?php echo $siswa['id_siswa']; ?>-formatif_2"></span>
+                                                    </div>
                                                 </td>
                                                 <td>
-                                                    <input type="number" 
-                                                           name="siswa[<?php echo $siswa['id_siswa']; ?>][formatif_3]" 
-                                                           class="form-control" 
-                                                           value="<?php echo $nilai ? $nilai['nilai_formatif_3'] : ''; ?>" 
-                                                           min="0" max="100" step="0.01" style="width: 80px;">
+                                                    <div class="input-wrapper">
+                                                        <input type="number" 
+                                                               name="siswa[<?php echo $siswa['id_siswa']; ?>][formatif_3]" 
+                                                               class="form-control nilai-input" 
+                                                               data-siswa="<?php echo $siswa['id_siswa']; ?>"
+                                                               data-field="formatif_3"
+                                                               value="<?php echo $nilai ? $nilai['nilai_formatif_3'] : ''; ?>" 
+                                                               min="0" max="100" step="0.01" style="width: 80px;">
+                                                        <span class="saving-indicator" id="status-<?php echo $siswa['id_siswa']; ?>-formatif_3"></span>
+                                                    </div>
                                                 </td>
                                                 <td>
-                                                    <input type="number" 
-                                                           name="siswa[<?php echo $siswa['id_siswa']; ?>][formatif_4]" 
-                                                           class="form-control" 
-                                                           value="<?php echo $nilai ? $nilai['nilai_formatif_4'] : ''; ?>" 
-                                                           min="0" max="100" step="0.01" style="width: 80px;">
+                                                    <div class="input-wrapper">
+                                                        <input type="number" 
+                                                               name="siswa[<?php echo $siswa['id_siswa']; ?>][formatif_4]" 
+                                                               class="form-control nilai-input" 
+                                                               data-siswa="<?php echo $siswa['id_siswa']; ?>"
+                                                               data-field="formatif_4"
+                                                               value="<?php echo $nilai ? $nilai['nilai_formatif_4'] : ''; ?>" 
+                                                               min="0" max="100" step="0.01" style="width: 80px;">
+                                                        <span class="saving-indicator" id="status-<?php echo $siswa['id_siswa']; ?>-formatif_4"></span>
+                                                    </div>
                                                 </td>
                                                 <td>
-                                                    <input type="number" 
-                                                           name="siswa[<?php echo $siswa['id_siswa']; ?>][sts]" 
-                                                           class="form-control" 
-                                                           value="<?php echo $nilai ? $nilai['nilai_sts'] : ''; ?>" 
-                                                           min="0" max="100" step="0.01" style="width: 80px;">
+                                                    <div class="input-wrapper">
+                                                        <input type="number" 
+                                                               name="siswa[<?php echo $siswa['id_siswa']; ?>][sts]" 
+                                                               class="form-control nilai-input" 
+                                                               data-siswa="<?php echo $siswa['id_siswa']; ?>"
+                                                               data-field="sts"
+                                                               value="<?php echo $nilai ? $nilai['nilai_sts'] : ''; ?>" 
+                                                               min="0" max="100" step="0.01" style="width: 80px;">
+                                                        <span class="saving-indicator" id="status-<?php echo $siswa['id_siswa']; ?>-sts"></span>
+                                                    </div>
                                                 </td>
                                                 <td>
-                                                    <input type="number" 
-                                                           name="siswa[<?php echo $siswa['id_siswa']; ?>][sas]" 
-                                                           class="form-control" 
-                                                           value="<?php echo $nilai ? $nilai['nilai_sas'] : ''; ?>" 
-                                                           min="0" max="100" step="0.01" style="width: 80px;">
+                                                    <div class="input-wrapper">
+                                                        <input type="number" 
+                                                               name="siswa[<?php echo $siswa['id_siswa']; ?>][sas]" 
+                                                               class="form-control nilai-input" 
+                                                               data-siswa="<?php echo $siswa['id_siswa']; ?>"
+                                                               data-field="sas"
+                                                               value="<?php echo $nilai ? $nilai['nilai_sas'] : ''; ?>" 
+                                                               min="0" max="100" step="0.01" style="width: 80px;">
+                                                        <span class="saving-indicator" id="status-<?php echo $siswa['id_siswa']; ?>-sas"></span>
+                                                    </div>
                                                 </td>
-                                                <td style="text-align:center;font-weight:bold;color:<?php echo $warna_rata; ?>;">
+                                                <td style="text-align:center;font-weight:bold;color:<?php echo $warna_rata; ?>;" id="rata-<?php echo $siswa['id_siswa']; ?>">
                                                     <?php echo $rata_rata; ?>
                                                 </td>
                                                 <td>
-                                                    <input type="text" 
-                                                           name="siswa[<?php echo $siswa['id_siswa']; ?>][deskripsi]" 
-                                                           class="form-control" 
-                                                           value="<?php echo $nilai ? $nilai['deskripsi'] : ''; ?>" 
-                                                           placeholder="Deskripsi nilai" style="width: 200px;">
+                                                    <div class="input-wrapper">
+                                                        <input type="text" 
+                                                               name="siswa[<?php echo $siswa['id_siswa']; ?>][deskripsi]" 
+                                                               class="form-control nilai-input" 
+                                                               data-siswa="<?php echo $siswa['id_siswa']; ?>"
+                                                               data-field="deskripsi"
+                                                               value="<?php echo $nilai ? $nilai['deskripsi'] : ''; ?>" 
+                                                               placeholder="Deskripsi nilai" style="width: 200px;">
+                                                        <span class="saving-indicator" id="status-<?php echo $siswa['id_siswa']; ?>-deskripsi"></span>
+                                                    </div>
                                                 </td>
                                             </tr>
                                             <?php endforeach; ?>
@@ -336,10 +388,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
                                 <div class="mt-20">
                                     <p><strong>KKM Mata Pelajaran:</strong> <?php echo $kkm; ?></p>
                                     <p><em>Nilai Raport = Rata-rata dari 6 parameter (Formatif 1-4, STS, SAS)</em></p>
-                                </div>
-                                
-                                <div class="mt-20">
-                                    <button type="submit" name="simpan_nilai" class="btn btn-success">Simpan Semua Nilai</button>
+                                    <p><em>Perubahan nilai akan tersimpan otomatis</em></p>
                                 </div>
                             </div>
                         </div>
@@ -348,5 +397,131 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
             <?php endif; ?>
         </div>
     </div>
+    
+    <script>
+        // Variabel untuk menyimpan ID semester aktif dan mata pelajaran
+        const idSemester = <?php echo $semester_aktif ? $semester_aktif['id_semester'] : 0; ?>;
+        const idMapel = '<?php echo $filter_mapel; ?>';
+        const kkm = <?php echo isset($kkm) ? $kkm : 75; ?>;
+        
+        // Timeout untuk debouncing
+        let saveTimeouts = {};
+        
+        // Fungsi untuk menyimpan nilai via AJAX
+        function saveNilai(idSiswa, field, value, statusElement, rataElement) {
+            // Clear timeout sebelumnya jika ada
+            const timeoutKey = idSiswa + '-' + field;
+            if (saveTimeouts[timeoutKey]) {
+                clearTimeout(saveTimeouts[timeoutKey]);
+            }
+            
+            // Set timeout baru (delay 500ms untuk debouncing)
+            saveTimeouts[timeoutKey] = setTimeout(() => {
+                // Tampilkan indikator saving
+                statusElement.textContent = '💾 Menyimpan...';
+                statusElement.className = 'saving-indicator';
+                
+                // Buat FormData
+                const formData = new FormData();
+                formData.append('id_siswa', idSiswa);
+                formData.append('id_mapel', idMapel);
+                formData.append('id_semester', idSemester);
+                formData.append('field', field);
+                formData.append('value', value);
+                
+                // Kirim request AJAX
+                fetch('save_nilai_ajax.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        statusElement.textContent = '✓ Tersimpan';
+                        statusElement.className = 'saving-indicator save-success';
+                        
+                        // Update rata-rata jika ada
+                        if (rataElement && data.rata_rata !== undefined) {
+                            rataElement.textContent = data.rata_rata;
+                            
+                            // Update warna berdasarkan KKM
+                            if (data.rata_rata !== '') {
+                                const nilaiRata = parseFloat(data.rata_rata);
+                                rataElement.style.color = nilaiRata < kkm ? 'red' : 'green';
+                            } else {
+                                rataElement.style.color = '#333';
+                            }
+                        }
+                        
+                        // Hilangkan status setelah 2 detik
+                        setTimeout(() => {
+                            statusElement.textContent = '';
+                        }, 2000);
+                    } else {
+                        statusElement.textContent = '✗ Gagal';
+                        statusElement.className = 'saving-indicator save-error';
+                        console.error('Error:', data.message);
+                        
+                        // Hilangkan status setelah 3 detik
+                        setTimeout(() => {
+                            statusElement.textContent = '';
+                        }, 3000);
+                    }
+                })
+                .catch(error => {
+                    statusElement.textContent = '✗ Error';
+                    statusElement.className = 'saving-indicator save-error';
+                    console.error('Error:', error);
+                    
+                    // Hilangkan status setelah 3 detik
+                    setTimeout(() => {
+                        statusElement.textContent = '';
+                    }, 3000);
+                });
+            }, 500);
+        }
+        
+        // Attach event listener ke semua input nilai
+        document.addEventListener('DOMContentLoaded', function() {
+            const nilaiInputs = document.querySelectorAll('.nilai-input');
+            
+            nilaiInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const idSiswa = this.getAttribute('data-siswa');
+                    const field = this.getAttribute('data-field');
+                    const value = this.value;
+                    const statusElement = document.getElementById('status-' + idSiswa + '-' + field);
+                    const rataElement = document.getElementById('rata-' + idSiswa);
+                    
+                    // Validasi nilai untuk input number
+                    if (this.type === 'number' && value !== '') {
+                        const numValue = parseFloat(value);
+                        if (numValue < 0 || numValue > 100) {
+                            alert('Nilai harus antara 0-100');
+                            this.value = '';
+                            return;
+                        }
+                    }
+                    
+                    saveNilai(idSiswa, field, value, statusElement, rataElement);
+                });
+                
+                // Tambahan: auto-save saat user blur dari input (keluar dari field)
+                input.addEventListener('blur', function() {
+                    const idSiswa = this.getAttribute('data-siswa');
+                    const field = this.getAttribute('data-field');
+                    const value = this.value;
+                    const statusElement = document.getElementById('status-' + idSiswa + '-' + field);
+                    const rataElement = document.getElementById('rata-' + idSiswa);
+                    
+                    // Hanya save jika ada perubahan
+                    if (this.defaultValue !== value) {
+                        saveNilai(idSiswa, field, value, statusElement, rataElement);
+                        this.defaultValue = value;
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
