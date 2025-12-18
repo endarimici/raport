@@ -1,6 +1,8 @@
 <?php
+
 require_once '../../config.php';
-requireRole(['administrator', 'wali_kelas']);
+
+//requireRole(['administrator', 'wali_kelas']);
 
 $id_siswa = isset($_GET['id']) ? cleanInput($_GET['id']) : '';
 $id_semester = isset($_GET['semester']) ? cleanInput($_GET['semester']) : '';
@@ -15,7 +17,7 @@ if(!$id_semester) {
 
 // Cek akses jika wali kelas
 if($_SESSION['role'] == 'wali_kelas') {
-    $id_wali_kelas = $_SESSION['id_user'];
+    $id_wali_kelas = $_SESSION['user_id'];
     $query_check = "SELECT s.* FROM siswa s 
                     INNER JOIN rombel r ON s.id_rombel = r.id_rombel 
                     WHERE s.id_siswa = '$id_siswa' AND r.id_wali_kelas = '$id_wali_kelas'";

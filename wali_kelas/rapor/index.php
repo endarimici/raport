@@ -3,7 +3,7 @@ require_once '../../config.php';
 requireRole('wali_kelas');
 
 // Ambil ID wali kelas dari session
-$id_wali_kelas = $_SESSION['id_user'];
+$id_wali_kelas = $_SESSION['user_id'];
 
 // Filter
 $filter_rombel = isset($_GET['rombel']) ? cleanInput($_GET['rombel']) : '';
@@ -11,6 +11,7 @@ $filter_semester = isset($_GET['semester']) ? cleanInput($_GET['semester']) : ''
 
 // Ambil semua rombel yang di-handle wali kelas ini
 $query_rombel = "SELECT * FROM rombel WHERE id_wali_kelas = '$id_wali_kelas' ORDER BY nama_rombel";
+
 $result_rombel_list = mysqli_query($conn, $query_rombel);
 
 // Cek apakah wali kelas punya rombel

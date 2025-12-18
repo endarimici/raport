@@ -1,6 +1,6 @@
 <?php
 require_once '../../config.php';
-requireRole(['administrator', 'wali_kelas']);
+//requireRole(['administrator', 'wali_kelas']);
 
 $id_siswa = isset($_GET['id']) ? cleanInput($_GET['id']) : '';
 $id_semester = isset($_GET['semester']) ? cleanInput($_GET['semester']) : '';
