@@ -9,6 +9,7 @@
     
     <ul class="sidebar-menu">
         <li><a href="<?php echo BASE_URL; ?>wali_kelas/dashboard.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>">📊 Dashboard</a></li>
+        <li><a href="<?php echo BASE_URL; ?>wali_kelas/rapor/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/rapor/') !== false ? 'active' : ''; ?>">📄 Nilai Rapor</a></li>
         <li><a href="<?php echo BASE_URL; ?>wali_kelas/nilai/download.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'download.php' ? 'active' : ''; ?>">💾 Download Raport</a></li>
     </ul>
 </div>

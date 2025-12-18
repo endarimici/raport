@@ -16,7 +16,8 @@
         <li><a href="<?php echo BASE_URL; ?>admin/guru_mapel/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/guru_mapel/') !== false ? 'active' : ''; ?>">👨‍🏫 Jadwal Guru</a></li>
         <li><a href="<?php echo BASE_URL; ?>admin/siswa/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/siswa/') !== false ? 'active' : ''; ?>">👨‍🎓 Data Siswa</a></li>
         <li><a href="<?php echo BASE_URL; ?>admin/semester/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/semester/') !== false ? 'active' : ''; ?>">📅 Semester & TA</a></li>
-        <li><a href="<?php echo BASE_URL; ?>admin/nilai/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/nilai/') !== false ? 'active' : ''; ?>">📝 Nilai Siswa</a></li>
+        <li><a href="<?php echo BASE_URL; ?>admin/nilai/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/nilai/') !== false && strpos($_SERVER['PHP_SELF'], '/rapor/') === false ? 'active' : ''; ?>">📝 Nilai Siswa</a></li>
+        <li><a href="<?php echo BASE_URL; ?>admin/rapor/index.php" class="<?php echo strpos($_SERVER['PHP_SELF'], '/rapor/') !== false ? 'active' : ''; ?>">📄 Nilai Rapor</a></li>
     </ul>
 </div>
 
