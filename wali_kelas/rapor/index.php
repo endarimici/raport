@@ -6,32 +6,46 @@ requireRole('wali_kelas');
 $id_wali_kelas = $_SESSION['id_user'];
 
 // Filter
+$filter_rombel = isset($_GET['rombel']) ? cleanInput($_GET['rombel']) : '';
 $filter_semester = isset($_GET['semester']) ? cleanInput($_GET['semester']) : '';
 
-// Ambil rombel yang di-handle wali kelas ini
+// Ambil semua rombel yang di-handle wali kelas ini
 $query_rombel = "SELECT * FROM rombel WHERE id_wali_kelas = '$id_wali_kelas' ORDER BY nama_rombel";
-$result_rombel = mysqli_query($conn, $query_rombel);
-$rombel_data = mysqli_fetch_assoc($result_rombel);
+$result_rombel_list = mysqli_query($conn, $query_rombel);
 
-if(!$rombel_data) {
+// Cek apakah wali kelas punya rombel
+if(mysqli_num_rows($result_rombel_list) == 0) {
     die("Anda belum ditugaskan sebagai wali kelas untuk rombel manapun.");
 }
 
-$id_rombel = $rombel_data['id_rombel'];
+// Jika filter rombel tidak dipilih, ambil rombel pertama sebagai default
+if(empty($filter_rombel)) {
+    $result_rombel_list_temp = mysqli_query($conn, $query_rombel);
+    $first_rombel = mysqli_fetch_assoc($result_rombel_list_temp);
+    $filter_rombel = $first_rombel['id_rombel'];
+}
 
 // Query semester
 $query_semester = "SELECT * FROM semester ORDER BY id_semester DESC";
 $result_semester_filter = mysqli_query($conn, $query_semester);
 
-// Query siswa di rombel yang dihandle
+// Query rombel untuk dropdown filter
+$result_rombel_filter = mysqli_query($conn, $query_rombel);
+
+// Query siswa di rombel yang dipilih
 $query = "SELECT s.*, r.nama_rombel, j.nama_jurusan,
           (SELECT nama_lengkap FROM users WHERE id_user = r.id_wali_kelas) as wali_kelas
           FROM siswa s
           INNER JOIN rombel r ON s.id_rombel = r.id_rombel
           INNER JOIN jurusan j ON r.id_jurusan = j.id_jurusan
-          WHERE s.id_rombel = '$id_rombel'
+          WHERE s.id_rombel = '$filter_rombel'
           ORDER BY s.nama_lengkap";
 $result = mysqli_query($conn, $query);
+
+// Ambil nama rombel yang sedang dipilih
+$query_current_rombel = "SELECT nama_rombel FROM rombel WHERE id_rombel = '$filter_rombel'";
+$result_current_rombel = mysqli_query($conn, $query_current_rombel);
+$current_rombel = mysqli_fetch_assoc($result_current_rombel);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -89,16 +103,23 @@ $result = mysqli_query($conn, $query);
             </div>
             
             <div class="content">
-                <div class="info-box">
-                    <strong>Rombel Anda:</strong> <?php echo htmlspecialchars($rombel_data['nama_rombel']); ?>
-                </div>
-
                 <div class="card">
                     <div class="card-header">
-                        <h3>Filter Semester</h3>
+                        <h3>Filter Data</h3>
                     </div>
                     <div class="card-body">
                         <form method="GET" action="" class="filter-form">
+                            <div class="form-group">
+                                <label>Rombel:</label>
+                                <select name="rombel" class="form-control" required>
+                                    <option value="">-- Pilih Rombel --</option>
+                                    <?php while($row = mysqli_fetch_assoc($result_rombel_filter)): ?>
+                                    <option value="<?php echo $row['id_rombel']; ?>" <?php echo $filter_rombel == $row['id_rombel'] ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($row['nama_rombel']); ?>
+                                    </option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
                             <div class="form-group">
                                 <label>Semester:</label>
                                 <select name="semester" class="form-control">
@@ -117,7 +138,7 @@ $result = mysqli_query($conn, $query);
 
                 <div class="card" style="margin-top: 20px;">
                     <div class="card-header">
-                        <h3>Data Siswa</h3>
+                        <h3>Data Siswa - <?php echo htmlspecialchars($current_rombel['nama_rombel']); ?></h3>
                     </div>
                     <div class="card-body">
                         <table class="table">
