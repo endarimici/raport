@@ -22,7 +22,7 @@ if($_SESSION['role'] == 'wali_kelas') {
 }
 
 // Ambil data siswa
-$query_siswa = "SELECT s.*, r.nama_rombel, j.nama_jurusan, j.fase,
+$query_siswa = "SELECT s.*, r.nama_rombel, j.nama_jurusan, case when r.tingkat = 'X' then 'E' else 'F' end as fase,
                 (SELECT nama_lengkap FROM users WHERE id_user = r.id_wali_kelas) as wali_kelas
                 FROM siswa s
                 INNER JOIN rombel r ON s.id_rombel = r.id_rombel
@@ -38,6 +38,7 @@ if(!$siswa) {
 // Ambil data semester jika ada
 $semester_info = '';
 $tahun_ajaran = '';
+$jenis_semester = 'GANJIL'; // default
 if($id_semester) {
     $query_semester = "SELECT * FROM semester WHERE id_semester = '$id_semester'";
     $result_semester = mysqli_query($conn, $query_semester);
@@ -45,16 +46,17 @@ if($id_semester) {
     if($semester_data) {
         $semester_info = $semester_data['nama_semester'];
         $tahun_ajaran = $semester_data['tahun_ajaran'];
+        $jenis_semester = strtoupper($semester_data['semester']); // Ganjil atau Genap
     }
 }
 
 // Ambil nilai siswa per mata pelajaran
 $where_semester = $id_semester ? "AND n.id_semester = '$id_semester'" : "";
-$query_nilai = "SELECT m.nama_mapel, n.nilai_akhir, n.deskripsi_kompetensi
+$query_nilai = "SELECT m.nama_mapel,m.kelompok, n.nilai_akhir, m.deskripsi_a, m.deskripsi_b, m.deskripsi_c, m.deskripsi_d
                 FROM nilai n
                 INNER JOIN mata_pelajaran m ON n.id_mapel = m.id_mapel
                 WHERE n.id_siswa = '$id_siswa' $where_semester
-                ORDER BY m.urutan, m.nama_mapel";
+                ORDER BY m.kelompok, m.urutan, m.nama_mapel";
 $result_nilai = mysqli_query($conn, $query_nilai);
 
 // Ambil data rapor tambahan
@@ -128,12 +130,12 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
         }
         
         .info-label {
-            width: 150px;
+            width: 110px;
             font-weight: bold;
         }
         
         .info-separator {
-            width: 20px;
+            width: 10px;
             text-align: center;
         }
         
@@ -242,12 +244,15 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
 <body>
     <div class="no-print" style="text-align: center; margin-bottom: 20px;">
         <a href="javascript:history.back()" class="btn-back">← Kembali</a>
-        <button onclick="window.print()" class="btn-print">🖨️ Cetak / Download PDF</button>
+        <a href="generate_pdf.php?id=<?php echo $id_siswa; ?>&semester=<?php echo $id_semester; ?>" class="btn-print" style="text-decoration: none;">📥 Download PDF</a>
+        <button onclick="window.print()" class="btn-print" style="background-color: #FF9800;">🖨️ Cetak</button>
     </div>
     
     <div class="rapor-container">
         <div class="header">
-            <h1>Format Laporan Hasil Belajar (Rapor) Jenjang SMA</h1>
+            <h1>LAPORAN HASIL BELAJAR SUMATIF AKHIR SEMESTER <?php echo htmlspecialchars($jenis_semester); ?><br>
+                TAHUN AJARAN <?php echo htmlspecialchars($tahun_ajaran); ?>
+            </h1>
         </div>
         
         <div class="info-section">
@@ -266,12 +271,12 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
                     <div class="info-row">
                         <div class="info-label">Sekolah</div>
                         <div class="info-separator">:</div>
-                        <div class="info-value">SMK</div>
+                        <div class="info-value">SMK MUHAMMADIYAH 8 PAKIS</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Alamat</div>
                         <div class="info-separator">:</div>
-                        <div class="info-value"><?php echo htmlspecialchars($siswa['alamat']); ?></div>
+                        <div class="info-value">JL RAYA SUMBERPASIR NO 188</div>
                     </div>
                 </div>
                 <div style="width: 48%;">
@@ -310,15 +315,39 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
             </thead>
             <tbody>
                 <?php 
+                $kelompok = "";
                 $no = 1;
                 if(mysqli_num_rows($result_nilai) > 0):
                     while($nilai = mysqli_fetch_assoc($result_nilai)): 
+                        if($kelompok != $nilai['kelompok']) {
+                            $kelompok = $nilai['kelompok'];
+                            if ($kelompok == 'A') {
+                                $kelompok_nama = 'Kelompok Mata Pelajaran Umum';
+                            } elseif ($kelompok == 'B') {
+                                $kelompok_nama = 'Kelompok Mata Pelajaran Kejuruan';
+                            } else {
+                                $kelompok_nama = 'Muatan Lokal';
+                            }
+                            echo '<tr><td colspan="4" style="font-weight: bold; background-color: #e0e0e0;">' . htmlspecialchars(ucwords($kelompok_nama)) . '</td></tr>';
+                        }
                 ?>
                 <tr>
                     <td class="text-center"><?php echo $no++; ?></td>
                     <td><?php echo htmlspecialchars($nilai['nama_mapel']); ?></td>
                     <td class="text-center"><?php echo htmlspecialchars($nilai['nilai_akhir']); ?></td>
-                    <td><?php echo nl2br(htmlspecialchars($nilai['deskripsi_kompetensi'] ?: '-')); ?></td>
+                    <td>
+                        <?php 
+                            if ($nilai['nilai_akhir'] >= 90) {
+                                echo nl2br(htmlspecialchars($nilai['deskripsi_a'] ?: '-'));
+                            } elseif ($nilai['nilai_akhir'] >= 80) {
+                                echo nl2br(htmlspecialchars($nilai['deskripsi_b'] ?: '-'));
+                            } elseif ($nilai['nilai_akhir'] >= 70) {
+                                echo nl2br(htmlspecialchars($nilai['deskripsi_c'] ?: '-'));
+                            } else {
+                                echo nl2br(htmlspecialchars($nilai['deskripsi_d'] ?: '-'));
+                            } 
+                        ?>
+                    </td>
                 </tr>
                 <?php 
                     endwhile;
@@ -331,12 +360,23 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
             </tbody>
         </table>
         
-        <div class="section-title">Kokurikuler</div>
-        <?php if($rapor_tambahan && !empty($rapor_tambahan['deskripsi_kokurikuler'])): ?>
-        <p style="margin-bottom: 10px;"><?php echo nl2br(htmlspecialchars($rapor_tambahan['deskripsi_kokurikuler'])); ?></p>
-        <?php else: ?>
-        <p style="margin-bottom: 10px; color: #999; font-style: italic;">Belum ada deskripsi kokurikuler.</p>
-        <?php endif; ?>
+        <table class="kokurikuler-table">
+            <thead>
+                <tr>
+                    <th style="width: 100%;">Kokurikuler</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><?php if($rapor_tambahan && !empty($rapor_tambahan['deskripsi_kokurikuler'])): ?>
+                    <p style="margin-bottom: 10px;"><?php echo nl2br(htmlspecialchars($rapor_tambahan['deskripsi_kokurikuler'])); ?></p>
+                    <?php else: ?>
+                    <p style="margin-bottom: 10px; color: #999; font-style: italic;">Belum ada deskripsi kokurikuler.</p>
+                    <?php endif; ?></td>
+                   
+                </tr>
+            </tbody>
+        </table>
         
         <table class="kokurikuler-table">
             <thead>
@@ -369,7 +409,7 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
         </table>
         
         <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-            <div style="width: 48%;">
+            <div style="width: 100%;">
                 <div class="section-title">Ketidakhadiran</div>
                 <table class="kehadiran-table">
                     <tr>
@@ -398,23 +438,40 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
             </div>
         </div>
         
-        <div class="section-title">Tanggapan Orang Tua/Wali Murid</div>
-        <div class="catatan-box">
-            &nbsp;
-        </div>
-        
+        <table class="kokurikuler-table">
+            <thead>
+                <tr>
+                    <th style="width: 100%;">Tanggapan Orang Tua/Wali Murid</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><br><br><br></td>
+                   
+                </tr>
+            </tbody>
+        </table>
         <div class="signature-section">
             <div class="signature-box">
-                <div>Orang Tua Murid</div>
-                <div class="signature-line">TTD</div>
             </div>
             <div class="signature-box">
-                <div>Kepala Sekolah</div>
-                <div class="signature-line">TTD</div>
             </div>
             <div class="signature-box">
-                <div>Tempat, Tanggal rapor<br>Wali Kelas</div>
-                <div class="signature-line">TTD</div>
+                <div>Malang, .....................<?= date("Y") ?></div>
+            </div>
+        </div>
+        <div class="signature-section">
+            <div class="signature-box">
+                <div>Orang Tua Murid<br><br></div>
+                <div class="signature-line"></div>
+            </div>
+            <div class="signature-box">
+                <div><br><br><br>Kepala Sekolah<br><br></div>
+                <div class="signature-line"></div>
+            </div>
+            <div class="signature-box">
+                <div>Wali Kelas<br><br></div>
+                <div class="signature-line"></div>
             </div>
         </div>
     </div>

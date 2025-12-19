@@ -18,7 +18,7 @@ if (!$data) {
 $queryGuru = "SELECT id_user, nama_lengkap, username FROM users WHERE role = 'guru' ORDER BY nama_lengkap";
 $resultGuru = mysqli_query($conn, $queryGuru);
 
-$queryMapel = "SELECT id_mapel, nama_mapel FROM mata_pelajaran ORDER BY nama_mapel";
+$queryMapel = "SELECT id_mapel, kode_mapel, nama_mapel FROM mata_pelajaran ORDER BY nama_mapel";
 $resultMapel = mysqli_query($conn, $queryMapel);
 
 $queryRombel = "SELECT id_rombel, nama_rombel FROM rombel ORDER BY nama_rombel";
@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <?php while ($mapel = mysqli_fetch_assoc($resultMapel)): ?>
                                     <option value="<?php echo $mapel['id_mapel']; ?>" 
                                         <?php echo (isset($_POST['id_mapel']) ? $_POST['id_mapel'] : $data['id_mapel']) == $mapel['id_mapel'] ? 'selected' : ''; ?>>
-                                        <?php echo $mapel['nama_mapel']; ?>
+                                        <?php echo $mapel['kode_mapel']; ?> - <?php echo $mapel['nama_mapel']; ?>
                                     </option>
                                 <?php endwhile; ?>
                             </select>

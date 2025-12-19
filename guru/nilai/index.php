@@ -14,7 +14,7 @@ if (!$semester_aktif) {
 }
 
 // Ambil rombel dan mapel yang diajar guru
-$query_mapel_guru = "SELECT DISTINCT r.id_rombel, r.nama_rombel, m.id_mapel, m.nama_mapel
+$query_mapel_guru = "SELECT DISTINCT r.id_rombel, r.nama_rombel, m.id_mapel, m.kode_mapel, m.nama_mapel
                      FROM mapel_guru mg
                      INNER JOIN rombel r ON mg.id_rombel = r.id_rombel
                      INNER JOIN mata_pelajaran m ON mg.id_mapel = m.id_mapel
@@ -58,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
         $formatif_4 = isset($data['formatif_4']) ? cleanInput($data['formatif_4']) : null;
         $sts = isset($data['sts']) ? cleanInput($data['sts']) : null;
         $sas = isset($data['sas']) ? cleanInput($data['sas']) : null;
-        $deskripsi = cleanInput($data['deskripsi']);
         
         // Hitung nilai yang sudah diisi
         $nilai_array = array_filter([$formatif_1, $formatif_2, $formatif_3, $formatif_4, $sts, $sas], function($v) {
@@ -92,14 +91,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
                           nilai_sts = " . ($sts ? "'$sts'" : "NULL") . ",
                           nilai_sas = " . ($sas ? "'$sas'" : "NULL") . ",
                           nilai_akhir = '$nilai_akhir',
-                          predikat = '$predikat',
-                          deskripsi = '$deskripsi'
+                          predikat = '$predikat'
                           WHERE id_siswa = $id_siswa 
                           AND id_mapel = '$filter_mapel' 
                           AND id_semester = {$semester_aktif['id_semester']}";
             } else {
                 // Insert
-                $query = "INSERT INTO nilai (id_siswa, id_mapel, id_semester, nilai_formatif_1, nilai_formatif_2, nilai_formatif_3, nilai_formatif_4, nilai_sts, nilai_sas, nilai_akhir, predikat, deskripsi, id_guru) 
+                $query = "INSERT INTO nilai (id_siswa, id_mapel, id_semester, nilai_formatif_1, nilai_formatif_2, nilai_formatif_3, nilai_formatif_4, nilai_sts, nilai_sas, nilai_akhir, predikat, id_guru) 
                           VALUES ($id_siswa, '$filter_mapel', {$semester_aktif['id_semester']}, 
                           " . ($formatif_1 ? "'$formatif_1'" : "NULL") . ", 
                           " . ($formatif_2 ? "'$formatif_2'" : "NULL") . ", 
@@ -107,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
                           " . ($formatif_4 ? "'$formatif_4'" : "NULL") . ", 
                           " . ($sts ? "'$sts'" : "NULL") . ", 
                           " . ($sas ? "'$sas'" : "NULL") . ", 
-                          '$nilai_akhir', '$predikat', '$deskripsi', $id_user)";
+                          '$nilai_akhir', '$predikat', $id_user)";
             }
             
             if (mysqli_query($conn, $query)) {
@@ -175,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
                         <form method="GET" action="" class="form-inline">
                             <div class="form-group">
                                 <label for="rombel">Rombel *</label>
-                                <select id="rombel" name="rombel" class="form-control" required>
+                                <select id="rombel" name="rombel" class="form-control" onchange="loadMapelByRombel()" required>
                                     <option value="">-- Pilih Rombel --</option>
                                     <?php 
                                     mysqli_data_seek($result_mapel_guru, 0);
@@ -207,8 +205,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
                                             $mapel_added[] = $mg['id_mapel'];
                                     ?>
                                         <option value="<?php echo $mg['id_mapel']; ?>" 
+                                            data-rombel="<?php echo $mg['id_rombel']; ?>"
                                             <?php echo $filter_mapel == $mg['id_mapel'] ? 'selected' : ''; ?>>
-                                            <?php echo $mg['nama_mapel']; ?>
+                                            <?php echo $mg['kode_mapel']; ?> - <?php echo $mg['nama_mapel']; ?>
                                         </option>
                                     <?php 
                                         endif;
@@ -243,7 +242,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
                                                 <th rowspan="2">STS</th>
                                                 <th rowspan="2">SAS</th>
                                                 <th rowspan="2">Rata-rata</th>
-                                                <th rowspan="2">Deskripsi</th>
                                             </tr>
                                             <tr>
                                                 <th style="text-align:center;">F1</th>
@@ -367,18 +365,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
                                                 <td style="text-align:center;font-weight:bold;color:<?php echo $warna_rata; ?>;" id="rata-<?php echo $siswa['id_siswa']; ?>">
                                                     <?php echo $rata_rata; ?>
                                                 </td>
-                                                <td>
-                                                    <div class="input-wrapper">
-                                                        <input type="text" 
-                                                               name="siswa[<?php echo $siswa['id_siswa']; ?>][deskripsi]" 
-                                                               class="form-control nilai-input" 
-                                                               data-siswa="<?php echo $siswa['id_siswa']; ?>"
-                                                               data-field="deskripsi"
-                                                               value="<?php echo $nilai ? $nilai['deskripsi'] : ''; ?>" 
-                                                               placeholder="Deskripsi nilai" style="width: 200px;">
-                                                        <span class="saving-indicator" id="status-<?php echo $siswa['id_siswa']; ?>-deskripsi"></span>
-                                                    </div>
-                                                </td>
                                             </tr>
                                             <?php endforeach; ?>
                                         </tbody>
@@ -403,6 +389,52 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['simpan_nilai'])) {
         const idSemester = <?php echo $semester_aktif ? $semester_aktif['id_semester'] : 0; ?>;
         const idMapel = '<?php echo $filter_mapel; ?>';
         const kkm = <?php echo isset($kkm) ? $kkm : 75; ?>;
+        
+        // Fungsi untuk load mata pelajaran berdasarkan rombel
+        function loadMapelByRombel() {
+            const rombelSelect = document.getElementById('rombel');
+            const mapelSelect = document.getElementById('mapel');
+            const idRombel = rombelSelect.value;
+            
+            // Reset dropdown mapel
+            mapelSelect.innerHTML = '<option value="">-- Loading... --</option>';
+            mapelSelect.disabled = true;
+            
+            if (!idRombel) {
+                mapelSelect.innerHTML = '<option value="">-- Pilih Rombel Dulu --</option>';
+                return;
+            }
+            
+            // Fetch mata pelajaran dari server
+            fetch('get_mapel_by_rombel.php?id_rombel=' + idRombel)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data.length > 0) {
+                        mapelSelect.innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
+                        
+                        data.data.forEach(mapel => {
+                            const option = document.createElement('option');
+                            option.value = mapel.id_mapel;
+                            option.textContent = mapel.kode_mapel + ' - ' + mapel.nama_mapel;
+                            
+                            // Pertahankan pilihan jika sudah ada
+                            if (mapel.id_mapel == idMapel) {
+                                option.selected = true;
+                            }
+                            
+                            mapelSelect.appendChild(option);
+                        });
+                        
+                        mapelSelect.disabled = false;
+                    } else {
+                        mapelSelect.innerHTML = '<option value="">-- Tidak Ada Mata Pelajaran --</option>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    mapelSelect.innerHTML = '<option value="">-- Error Loading Data --</option>';
+                });
+        }
         
         // Timeout untuk debouncing
         let saveTimeouts = {};

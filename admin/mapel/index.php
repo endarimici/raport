@@ -12,7 +12,7 @@ if (isset($_GET['delete'])) {
     }
 }
 
-$query = "SELECT * FROM mata_pelajaran ORDER BY id_mapel DESC";
+$query = "SELECT * FROM mata_pelajaran ORDER BY urutan ASC, id_mapel DESC";
 $result = mysqli_query($conn, $query);
 ?>
 <!DOCTYPE html>
@@ -54,6 +54,7 @@ $result = mysqli_query($conn, $query);
                             <thead>
                                 <tr>
                                     <th>No</th>
+                                    <th>Urutan</th>
                                     <th>Kode Mapel</th>
                                     <th>Nama Mata Pelajaran</th>
                                     <th>Kelompok</th>
@@ -69,6 +70,7 @@ $result = mysqli_query($conn, $query);
                                 ?>
                                 <tr>
                                     <td><?php echo $no++; ?></td>
+                                    <td><?php echo $row['urutan'] ? $row['urutan'] : '-'; ?></td>
                                     <td><?php echo $row['kode_mapel']; ?></td>
                                     <td><?php echo $row['nama_mapel']; ?></td>
                                     <td><?php echo $kelompok_nama[$row['kelompok']]; ?></td>

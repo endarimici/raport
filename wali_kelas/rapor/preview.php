@@ -38,6 +38,7 @@ if(!$siswa) {
 // Ambil data semester jika ada
 $semester_info = '';
 $tahun_ajaran = '';
+$jenis_semester = 'GANJIL'; // default
 if($id_semester) {
     $query_semester = "SELECT * FROM semester WHERE id_semester = '$id_semester'";
     $result_semester = mysqli_query($conn, $query_semester);
@@ -45,6 +46,7 @@ if($id_semester) {
     if($semester_data) {
         $semester_info = $semester_data['nama_semester'];
         $tahun_ajaran = $semester_data['tahun_ajaran'];
+        $jenis_semester = strtoupper($semester_data['semester']); // Ganjil atau Genap
     }
 }
 
@@ -128,12 +130,12 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
         }
         
         .info-label {
-            width: 150px;
+            width: 110px;
             font-weight: bold;
         }
         
         .info-separator {
-            width: 20px;
+            width: 10px;
             text-align: center;
         }
         
@@ -242,13 +244,14 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
 <body>
     <div class="no-print" style="text-align: center; margin-bottom: 20px;">
         <a href="javascript:history.back()" class="btn-back">← Kembali</a>
-        <button onclick="window.print()" class="btn-print">🖨️ Cetak / Download PDF</button>
+        <a href="generate_pdf.php?id=<?php echo $id_siswa; ?>&semester=<?php echo $id_semester; ?>" class="btn-print" style="text-decoration: none;">📥 Download PDF</a>
+        <button onclick="window.print()" class="btn-print" style="background-color: #FF9800;">🖨️ Cetak</button>
     </div>
     
     <div class="rapor-container">
         <div class="header">
-            <h1>LAPORAN HASIL BELAJAR SUMATIF AKHIR SEMESTER GANJIL<br>
-                TAHUN AJARAN 2025 - 2026
+            <h1>LAPORAN HASIL BELAJAR SUMATIF AKHIR SEMESTER <?php echo htmlspecialchars($jenis_semester); ?><br>
+                TAHUN AJARAN <?php echo htmlspecialchars($tahun_ajaran); ?>
             </h1>
         </div>
         
@@ -268,12 +271,12 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
                     <div class="info-row">
                         <div class="info-label">Sekolah</div>
                         <div class="info-separator">:</div>
-                        <div class="info-value">SMK</div>
+                        <div class="info-value">SMK MUHAMMADIYAH 8 PAKIS</div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Alamat</div>
                         <div class="info-separator">:</div>
-                        <div class="info-value"><?php echo htmlspecialchars($siswa['alamat']); ?></div>
+                        <div class="info-value">JL RAYA SUMBERPASIR NO 188</div>
                     </div>
                 </div>
                 <div style="width: 48%;">

@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nama_mapel = cleanInput($_POST['nama_mapel']);
     $kelompok = cleanInput($_POST['kelompok']);
     $kkm = cleanInput($_POST['kkm']);
+    $urutan = cleanInput($_POST['urutan']);
     $deskripsi_a = cleanInput($_POST['deskripsi_a']);
     $deskripsi_b = cleanInput($_POST['deskripsi_b']);
     $deskripsi_c = cleanInput($_POST['deskripsi_c']);
@@ -24,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (mysqli_num_rows($result) > 0) {
             $error = 'Kode mata pelajaran sudah digunakan!';
         } else {
-            $query = "INSERT INTO mata_pelajaran (kode_mapel, nama_mapel, kelompok, kkm, deskripsi_a, deskripsi_b, deskripsi_c, deskripsi_d) 
-                      VALUES ('$kode_mapel', '$nama_mapel', '$kelompok', '$kkm', '$deskripsi_a', '$deskripsi_b', '$deskripsi_c', '$deskripsi_d')";
+            $query = "INSERT INTO mata_pelajaran (kode_mapel, nama_mapel, kelompok, kkm, urutan, deskripsi_a, deskripsi_b, deskripsi_c, deskripsi_d) 
+                      VALUES ('$kode_mapel', '$nama_mapel', '$kelompok', '$kkm', '$urutan', '$deskripsi_a', '$deskripsi_b', '$deskripsi_c', '$deskripsi_d')";
             
             if (mysqli_query($conn, $query)) {
                 $success = 'Mata pelajaran berhasil ditambahkan!';
@@ -95,6 +96,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <label for="kkm">KKM *</label>
                             <input type="number" id="kkm" name="kkm" class="form-control" 
                                    value="75" step="0.01" min="0" max="100" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="urutan">Urutan Tampil di Rapor</label>
+                            <input type="number" id="urutan" name="urutan" class="form-control" 
+                                   placeholder="Contoh: 1, 2, 3, dst" min="1">
+                            <small class="form-text">Urutan mata pelajaran saat ditampilkan di rapor siswa. Kosongkan jika tidak perlu.</small>
                         </div>
                         
                         <div class="alert alert-info">
