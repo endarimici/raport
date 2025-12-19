@@ -50,12 +50,12 @@ if($id_semester) {
     }
 }
 
-// Ambil nilai siswa
-$where_semester = $id_semester ? "AND n.id_semester = '$id_semester'" : "";
-$query_nilai = "SELECT m.nama_mapel, m.kelompok, n.nilai_akhir, m.deskripsi_a, m.deskripsi_b, m.deskripsi_c, m.deskripsi_d
-                FROM nilai n
-                INNER JOIN mata_pelajaran m ON n.id_mapel = m.id_mapel
-                WHERE n.id_siswa = '$id_siswa' $where_semester
+// Ambil semua mata pelajaran di rombel siswa dengan nilai (jika ada)
+$query_nilai = "SELECT DISTINCT m.nama_mapel, m.kelompok, n.nilai_akhir, m.deskripsi_a, m.deskripsi_b, m.deskripsi_c, m.deskripsi_d
+                FROM mapel_guru mg
+                INNER JOIN mata_pelajaran m ON mg.id_mapel = m.id_mapel
+                LEFT JOIN nilai n ON n.id_mapel = m.id_mapel AND n.id_siswa = '$id_siswa' AND n.id_semester = mg.id_semester
+                WHERE mg.id_rombel = '{$siswa['id_rombel']}' AND mg.id_semester = '$id_semester'
                 ORDER BY m.kelompok, m.urutan, m.nama_mapel";
 $result_nilai = mysqli_query($conn, $query_nilai);
 
@@ -277,26 +277,29 @@ while($nilai = mysqli_fetch_assoc($result_nilai)) {
             $kelompok_nama = 'Muatan Lokal';
         }
         $pdf->SetFont('Arial', 'B', 9);
+        $pdf->SetFillColor(200, 200, 200);
         $pdf->Cell(180, 6, $kelompok_nama, 1, 1, 'L', true);
         $pdf->SetFont('Arial', '', 9);
     }
     
     // Tentukan deskripsi berdasarkan nilai
     $deskripsi = '-';
-    if ($nilai['nilai_akhir'] >= 90) {
-        $deskripsi = $nilai['deskripsi_a'] ?: '-';
-    } elseif ($nilai['nilai_akhir'] >= 80) {
-        $deskripsi = $nilai['deskripsi_b'] ?: '-';
-    } elseif ($nilai['nilai_akhir'] >= 70) {
-        $deskripsi = $nilai['deskripsi_c'] ?: '-';
-    } else {
-        $deskripsi = $nilai['deskripsi_d'] ?: '-';
+    if ($nilai['nilai_akhir'] !== null && $nilai['nilai_akhir'] !== '') {
+        if ($nilai['nilai_akhir'] >= 90) {
+            $deskripsi = $nilai['deskripsi_a'] ?: '-';
+        } elseif ($nilai['nilai_akhir'] >= 80) {
+            $deskripsi = $nilai['deskripsi_b'] ?: '-';
+        } elseif ($nilai['nilai_akhir'] >= 70) {
+            $deskripsi = $nilai['deskripsi_c'] ?: '-';
+        } else {
+            $deskripsi = $nilai['deskripsi_d'] ?: '-';
+        }
     }
     
     // Hitung tinggi baris untuk semua kolom
     $x = $pdf->GetX();
     $y = $pdf->GetY();
-    
+    $yAwal = $y;
     // Hitung jumlah baris untuk nama mapel dan deskripsi
     $nb_mapel = $pdf->NbLines(50, $nilai['nama_mapel']);
     $nb_deskripsi = $pdf->NbLines(95, $deskripsi);
@@ -309,16 +312,21 @@ while($nilai = mysqli_fetch_assoc($result_nilai)) {
     
     // Mata Pelajaran dengan MultiCell
     $x_after_no = $pdf->GetX();
-    $pdf->MultiCell(50, 5, $nilai['nama_mapel'], 1, 'L');
-    
+    $pdf->MultiCell(50, 5, $nilai['nama_mapel'], 0, 'L');
+    $yAkhir = $pdf->GetY();
     // Kembali ke posisi setelah no, lalu geser untuk nilai akhir
-    $pdf->SetXY($x_after_no + 50, $y);
-    $pdf->Cell(20, $h, number_format($nilai['nilai_akhir'], 2), 1, 0, 'C');
+    $pdf->SetXY($x_after_no + 55, $y);
+    $nilai_tampil = $nilai['nilai_akhir'] ? number_format($nilai['nilai_akhir'], 2) : '-';
+    $pdf->Cell(20, $h, $nilai_tampil, 1, 0, 'C');
     
     // MultiCell untuk deskripsi
-    $pdf->SetXY($x_after_no + 70, $y);
-    $pdf->MultiCell(95, 5, $deskripsi, 1, 'L');
-    
+    $pdf->SetXY($x_after_no + 75, $y);
+    $pdf->MultiCell(95, 5, $deskripsi, 0, 'L');
+    if ($pdf->GetY() > $yAkhir) {
+        $yAkhir = $pdf->GetY();
+    }
+    $pdf->Line($x,$yAkhir,$x+180,$yAkhir);
+    $pdf->Line($x+180,$yAwal,$x+180,$yAkhir);
     // Set posisi Y setelah baris
     $pdf->SetY($y + $h);
 }

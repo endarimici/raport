@@ -50,12 +50,12 @@ if($id_semester) {
     }
 }
 
-// Ambil nilai siswa
-$where_semester = $id_semester ? "AND n.id_semester = '$id_semester'" : "";
-$query_nilai = "SELECT m.nama_mapel, m.kelompok, n.nilai_akhir, m.deskripsi_a, m.deskripsi_b, m.deskripsi_c, m.deskripsi_d
-                FROM nilai n
-                INNER JOIN mata_pelajaran m ON n.id_mapel = m.id_mapel
-                WHERE n.id_siswa = '$id_siswa' $where_semester
+// Ambil semua mata pelajaran di rombel siswa dengan nilai (jika ada)
+$query_nilai = "SELECT DISTINCT m.nama_mapel, m.kelompok, n.nilai_akhir, m.deskripsi_a, m.deskripsi_b, m.deskripsi_c, m.deskripsi_d
+                FROM mapel_guru mg
+                INNER JOIN mata_pelajaran m ON mg.id_mapel = m.id_mapel
+                LEFT JOIN nilai n ON n.id_mapel = m.id_mapel AND n.id_siswa = '$id_siswa' AND n.id_semester = mg.id_semester
+                WHERE mg.id_rombel = '{$siswa['id_rombel']}' AND mg.id_semester = '$id_semester'
                 ORDER BY m.kelompok, m.urutan, m.nama_mapel";
 $result_nilai = mysqli_query($conn, $query_nilai);
 
@@ -189,7 +189,7 @@ $pdf->SetFont('Arial', 'B', 14);
 $pdf->Cell(0, 7, 'LAPORAN HASIL BELAJAR SUMATIF AKHIR SEMESTER ' . $jenis_semester, 0, 1, 'C');
 $pdf->Cell(0, 7, 'TAHUN AJARAN ' . $tahun_ajaran, 0, 1, 'C');
 $pdf->Ln(2);
-$pdf->SetLineWidth(0.2);
+$pdf->SetLineWidth(0.8);
 $pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
 $pdf->Ln(5);
 
@@ -256,7 +256,7 @@ $pdf->Ln(3);
 
 // Tabel Nilai
 $pdf->SetFont('Arial', 'B', 9);
-$pdf->Cell(10, 7, 'No.', 1, 0, 'C');  
+$pdf->Cell(10, 7, 'No.', 1, 0, 'C');
 $pdf->Cell(55, 7, 'Mata Pelajaran', 1, 0, 'C');
 $pdf->Cell(20, 7, 'Nilai Akhir', 1, 0, 'C');
 $pdf->Cell(95, 7, 'Capaian Kompetensi', 1, 1, 'C');
@@ -284,14 +284,16 @@ while($nilai = mysqli_fetch_assoc($result_nilai)) {
     
     // Tentukan deskripsi berdasarkan nilai
     $deskripsi = '-';
-    if ($nilai['nilai_akhir'] >= 90) {
-        $deskripsi = $nilai['deskripsi_a'] ?: '-';
-    } elseif ($nilai['nilai_akhir'] >= 80) {
-        $deskripsi = $nilai['deskripsi_b'] ?: '-';
-    } elseif ($nilai['nilai_akhir'] >= 70) {
-        $deskripsi = $nilai['deskripsi_c'] ?: '-';
-    } else {
-        $deskripsi = $nilai['deskripsi_d'] ?: '-';
+    if ($nilai['nilai_akhir'] !== null && $nilai['nilai_akhir'] !== '') {
+        if ($nilai['nilai_akhir'] >= 90) {
+            $deskripsi = $nilai['deskripsi_a'] ?: '-';
+        } elseif ($nilai['nilai_akhir'] >= 80) {
+            $deskripsi = $nilai['deskripsi_b'] ?: '-';
+        } elseif ($nilai['nilai_akhir'] >= 70) {
+            $deskripsi = $nilai['deskripsi_c'] ?: '-';
+        } else {
+            $deskripsi = $nilai['deskripsi_d'] ?: '-';
+        }
     }
     
     // Hitung tinggi baris untuk semua kolom
@@ -314,7 +316,8 @@ while($nilai = mysqli_fetch_assoc($result_nilai)) {
     $yAkhir = $pdf->GetY();
     // Kembali ke posisi setelah no, lalu geser untuk nilai akhir
     $pdf->SetXY($x_after_no + 55, $y);
-    $pdf->Cell(20, $h, number_format($nilai['nilai_akhir'], 2), 1, 0, 'C');
+    $nilai_tampil = $nilai['nilai_akhir'] ? number_format($nilai['nilai_akhir'], 2) : '-';
+    $pdf->Cell(20, $h, $nilai_tampil, 1, 0, 'C');
     
     // MultiCell untuk deskripsi
     $pdf->SetXY($x_after_no + 75, $y);
@@ -380,7 +383,7 @@ $pdf->Cell(45, 6, ($rapor_tambahan ? $rapor_tambahan['tanpa_keterangan'] : '0') 
 $y_kehadiran = $pdf->GetY();
 
 // Catatan Wali Kelas
-//$pdf->SetY($y_start);
+$pdf->SetY($y_start);
 $pdf->SetX(105);
 $catatan = $rapor_tambahan && !empty($rapor_tambahan['catatan_wali_kelas']) ? 
            $rapor_tambahan['catatan_wali_kelas'] : 'Belum ada catatan dari wali kelas.';

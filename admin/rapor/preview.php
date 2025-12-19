@@ -50,12 +50,12 @@ if($id_semester) {
     }
 }
 
-// Ambil nilai siswa per mata pelajaran
-$where_semester = $id_semester ? "AND n.id_semester = '$id_semester'" : "";
-$query_nilai = "SELECT m.nama_mapel,m.kelompok, n.nilai_akhir, m.deskripsi_a, m.deskripsi_b, m.deskripsi_c, m.deskripsi_d
-                FROM nilai n
-                INNER JOIN mata_pelajaran m ON n.id_mapel = m.id_mapel
-                WHERE n.id_siswa = '$id_siswa' $where_semester
+// Ambil semua mata pelajaran di rombel siswa dengan nilai (jika ada)
+$query_nilai = "SELECT DISTINCT m.nama_mapel, m.kelompok, n.nilai_akhir, m.deskripsi_a, m.deskripsi_b, m.deskripsi_c, m.deskripsi_d
+                FROM mapel_guru mg
+                INNER JOIN mata_pelajaran m ON mg.id_mapel = m.id_mapel
+                LEFT JOIN nilai n ON n.id_mapel = m.id_mapel AND n.id_siswa = '$id_siswa' AND n.id_semester = mg.id_semester
+                WHERE mg.id_rombel = '{$siswa['id_rombel']}' AND mg.id_semester = '$id_semester'
                 ORDER BY m.kelompok, m.urutan, m.nama_mapel";
 $result_nilai = mysqli_query($conn, $query_nilai);
 
@@ -334,18 +334,22 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
                 <tr>
                     <td class="text-center"><?php echo $no++; ?></td>
                     <td><?php echo htmlspecialchars($nilai['nama_mapel']); ?></td>
-                    <td class="text-center"><?php echo htmlspecialchars($nilai['nilai_akhir']); ?></td>
+                    <td class="text-center"><?php echo $nilai['nilai_akhir'] ? htmlspecialchars($nilai['nilai_akhir']) : '-'; ?></td>
                     <td>
                         <?php 
-                            if ($nilai['nilai_akhir'] >= 90) {
-                                echo nl2br(htmlspecialchars($nilai['deskripsi_a'] ?: '-'));
-                            } elseif ($nilai['nilai_akhir'] >= 80) {
-                                echo nl2br(htmlspecialchars($nilai['deskripsi_b'] ?: '-'));
-                            } elseif ($nilai['nilai_akhir'] >= 70) {
-                                echo nl2br(htmlspecialchars($nilai['deskripsi_c'] ?: '-'));
+                            if ($nilai['nilai_akhir'] !== null && $nilai['nilai_akhir'] !== '') {
+                                if ($nilai['nilai_akhir'] >= 90) {
+                                    echo nl2br(htmlspecialchars($nilai['deskripsi_a'] ?: '-'));
+                                } elseif ($nilai['nilai_akhir'] >= 80) {
+                                    echo nl2br(htmlspecialchars($nilai['deskripsi_b'] ?: '-'));
+                                } elseif ($nilai['nilai_akhir'] >= 70) {
+                                    echo nl2br(htmlspecialchars($nilai['deskripsi_c'] ?: '-'));
+                                } else {
+                                    echo nl2br(htmlspecialchars($nilai['deskripsi_d'] ?: '-'));
+                                }
                             } else {
-                                echo nl2br(htmlspecialchars($nilai['deskripsi_d'] ?: '-'));
-                            } 
+                                echo '-';
+                            }
                         ?>
                     </td>
                 </tr>
