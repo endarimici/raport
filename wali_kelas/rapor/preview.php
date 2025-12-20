@@ -116,21 +116,26 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
         .header {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             margin-bottom: 20px;
             border-bottom: 3px solid #000;
             padding-bottom: 10px;
         }
         
         .header-logo {
-            width: 96px;
-            height: 96px;
-            margin-right: 20px;
+            width: 106px;
+            height: 106px;
             flex-shrink: 0;
         }
         
         .header-text {
             flex: 1;
             text-align: center;
+        }
+        
+        .header-spacer {
+            width: 106px;
+            flex-shrink: 0;
         }
         
         .header h1 {
@@ -280,6 +285,7 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
                 <h2>PENILAIAN SEMESTER <?php echo htmlspecialchars($jenis_semester); ?><br>TAHUN PELAJARAN <?php echo htmlspecialchars($tahun_ajaran); ?>
                 </h2>
             </div>
+            <div class="header-spacer"></div>
         </div>
         
         <div class="info-section">
