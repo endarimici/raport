@@ -413,9 +413,14 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
         </table>
         
         <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-            <div style="width: 100%;">
-                <div class="section-title">Ketidakhadiran</div>
-                <table class="kehadiran-table">
+            <div style="width: 40%;">
+                <table class="kokurikuler-table">
+                    <thead>
+                        <tr>
+                            <th colspan="2">Ketidakhadiran</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     <tr>
                         <td>Sakit</td>
                         <td style="text-align: center;"><?php echo $rapor_tambahan ? htmlspecialchars($rapor_tambahan['sakit']) : '0'; ?> hari</td>
@@ -428,20 +433,31 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
                         <td>Tanpa Keterangan</td>
                         <td style="text-align: center;"><?php echo $rapor_tambahan ? htmlspecialchars($rapor_tambahan['tanpa_keterangan']) : '0'; ?> hari</td>
                     </tr>
+                    </tbody>
                 </table>
             </div>
-            <div style="width: 48%;">
-                <div class="section-title">Catatan Wali Kelas</div>
-                <div class="catatan-box">
-                    <?php if($rapor_tambahan && !empty($rapor_tambahan['catatan_wali_kelas'])): ?>
+            <div style="width: 55%;">
+                <table class="kokurikuler-table">
+                    <thead>
+                        <tr>
+                            <th>Catatan Wali Kelas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>
+                            <?php if($rapor_tambahan && !empty($rapor_tambahan['catatan_wali_kelas'])): ?>
                         <?php echo nl2br(htmlspecialchars($rapor_tambahan['catatan_wali_kelas'])); ?>
                     <?php else: ?>
-                        <span style="color: #999; font-style: italic;">Belum ada catatan dari wali kelas.</span>
+                        <span style="color: #999; font-style: italic;">Belum ada catatan dari wali kelas.<br><br><br><br></span>
                     <?php endif; ?>
-                </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                
             </div>
-        </div>
-        
+        </div>       
         <table class="kokurikuler-table">
             <thead>
                 <tr>
