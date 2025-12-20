@@ -114,10 +114,23 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
         }
         
         .header {
-            text-align: center;
+            display: flex;
+            align-items: center;
             margin-bottom: 20px;
             border-bottom: 3px solid #000;
             padding-bottom: 10px;
+        }
+        
+        .header-logo {
+            width: 80px;
+            height: 80px;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+        
+        .header-text {
+            flex: 1;
+            text-align: center;
         }
         
         .header h1 {
@@ -261,8 +274,11 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
     
     <div class="rapor-container">
         <div class="header">
-            <h1>LAPORAN HASIL BELAJAR (RAPOR)</h1> 
-            <h2>PENILAIAN SEMESTER <?php echo htmlspecialchars($jenis_semester); ?><br>TAHUN PELAJARAN <?php echo htmlspecialchars($tahun_ajaran); ?></h2>
+            <img src="../../assets/logo-SMK.png" alt="Logo SMK" class="header-logo">
+            <div class="header-text">
+                <h1>LAPORAN HASIL BELAJAR (RAPOR)</h1> 
+                <h2>PENILAIAN SEMESTER <?php echo htmlspecialchars($jenis_semester); ?><br>TAHUN PELAJARAN <?php echo htmlspecialchars($tahun_ajaran); ?></h2>
+            </div>
         </div>
         
         <div class="info-section">
