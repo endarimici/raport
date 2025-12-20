@@ -261,9 +261,9 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
     
     <div class="rapor-container">
         <div class="header">
-            <h1>LAPORAN HASIL BELAJAR (RAPOR) <br> PENILAIAN SEMESTER <?php echo htmlspecialchars($jenis_semester); ?><br>
-                TAHUN PELAJARAN <?php echo htmlspecialchars($tahun_ajaran); ?>
-            </h1>
+            <h1>LAPORAN HASIL BELAJAR (RAPOR)</h1> 
+            <h2>PENILAIAN SEMESTER <?php echo htmlspecialchars($jenis_semester); ?><br>TAHUN PELAJARAN <?php echo htmlspecialchars($tahun_ajaran); ?>
+            </h2>
         </div>
         
         <div class="info-section">
