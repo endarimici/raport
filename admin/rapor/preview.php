@@ -109,7 +109,7 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
             max-width: 210mm;
             margin: 0 auto;
             background-color: white;
-            padding: 20mm;
+            padding: 5mm;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         
@@ -264,7 +264,6 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
             <h1>LAPORAN HASIL BELAJAR (RAPOR)</h1> 
             <h2>PENILAIAN SEMESTER <?php echo htmlspecialchars($jenis_semester); ?><br>TAHUN PELAJARAN <?php echo htmlspecialchars($tahun_ajaran); ?></h2>
         </div>
-    </div>
         
         <div class="info-section">
             <div style="display: flex; justify-content: space-between;">

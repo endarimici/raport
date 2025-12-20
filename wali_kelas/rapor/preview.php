@@ -109,7 +109,7 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
             max-width: 210mm;
             margin: 0 auto;
             background-color: white;
-            padding: 20mm;
+            padding: 5mm;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         
