@@ -122,8 +122,8 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
         }
         
         .header-logo {
-            width: 80px;
-            height: 80px;
+            width: 96px;
+            height: 96px;
             margin-right: 20px;
             flex-shrink: 0;
         }
