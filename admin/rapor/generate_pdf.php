@@ -180,8 +180,8 @@ class PDF extends FPDF
 
 $pdf = new PDF();
 $pdf->AddPage();
-$pdf->SetMargins(15, 15, 15);
-$pdf->SetAutoPageBreak(true, 15);
+$pdf->SetMargins(10, 10, 10);
+$pdf->SetAutoPageBreak(true, 10);
 $pdf->SetLineWidth(0.3); // Set border tipis
 
 // Header
