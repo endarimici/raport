@@ -81,7 +81,11 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
             }
             body {
                 margin: 0;
-                padding: 20px;
+                padding: 5mm;
+            }
+            .rapor-container {
+                padding: 5mm;
+                box-shadow: none;
             }
         }
         
