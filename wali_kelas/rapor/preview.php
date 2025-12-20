@@ -261,8 +261,8 @@ $result_ekskul = mysqli_query($conn, $query_ekskul);
     
     <div class="rapor-container">
         <div class="header">
-            <h1>LAPORAN HASIL BELAJAR SUMATIF AKHIR SEMESTER <?php echo htmlspecialchars($jenis_semester); ?><br>
-                TAHUN AJARAN <?php echo htmlspecialchars($tahun_ajaran); ?>
+            <h1>LAPORAN HASIL BELAJAR (RAPOR) <br> PENILAIAN SEMESTER <?php echo htmlspecialchars($jenis_semester); ?><br>
+                TAHUN PELAJARAN <?php echo htmlspecialchars($tahun_ajaran); ?>
             </h1>
         </div>
         
