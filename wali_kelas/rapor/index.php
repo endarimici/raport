@@ -59,6 +59,7 @@ $current_rombel = mysqli_fetch_assoc($result_current_rombel);
         .action-buttons {
             display: flex;
             gap: 5px;
+            flex-wrap: wrap;
         }
         .btn-preview {
             background-color: #2196F3;
@@ -67,6 +68,16 @@ $current_rombel = mysqli_fetch_assoc($result_current_rombel);
             text-decoration: none;
             border-radius: 3px;
             font-size: 12px;
+            white-space: nowrap;
+        }
+        .btn-preview-sts {
+            background-color: #009688;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 12px;
+            white-space: nowrap;
         }
         .btn-review {
             background-color: #FF9800;
@@ -75,9 +86,13 @@ $current_rombel = mysqli_fetch_assoc($result_current_rombel);
             text-decoration: none;
             border-radius: 3px;
             font-size: 12px;
+            white-space: nowrap;
         }
         .btn-preview:hover {
             background-color: #1976D2;
+        }
+        .btn-preview-sts:hover {
+            background-color: #00796B;
         }
         .btn-review:hover {
             background-color: #F57C00;
@@ -170,6 +185,10 @@ $current_rombel = mysqli_fetch_assoc($result_current_rombel);
                                             <a href="preview.php?id=<?php echo $row['id_siswa']; ?><?php echo $filter_semester ? '&semester='.$filter_semester : ''; ?>" 
                                                class="btn-preview" target="_blank" title="Preview Rapor">
                                                 📄 Preview Rapor
+                                            </a>
+                                            <a href="preview_sts.php?id=<?php echo $row['id_siswa']; ?><?php echo $filter_semester ? '&semester='.$filter_semester : ''; ?>" 
+                                               class="btn-preview-sts" target="_blank" title="Preview Rapor STS">
+                                                📄 Preview Rapor STS
                                             </a>
                                             <a href="review.php?id=<?php echo $row['id_siswa']; ?><?php echo $filter_semester ? '&semester='.$filter_semester : ''; ?>" 
                                                class="btn-review" title="Review Rapor">

@@ -1,0 +1,399 @@
+<?php
+require_once '../../config.php';
+require_once('../../fpdf.php');
+
+$id_siswa = isset($_GET['id']) ? cleanInput($_GET['id']) : '';
+$id_semester = isset($_GET['semester']) ? cleanInput($_GET['semester']) : '';
+
+if(!$id_siswa) {
+    die("ID Siswa tidak valid");
+}
+
+// Cek akses jika wali kelas
+if(isset($_SESSION['role']) && $_SESSION['role'] == 'wali_kelas') {
+    $id_wali_kelas = $_SESSION['user_id'] ?? $_SESSION['id_user'];
+    $query_check = "SELECT s.* FROM siswa s 
+                    INNER JOIN rombel r ON s.id_rombel = r.id_rombel 
+                    WHERE s.id_siswa = '$id_siswa' AND r.id_wali_kelas = '$id_wali_kelas'";
+    $result_check = mysqli_query($conn, $query_check);
+    if(mysqli_num_rows($result_check) == 0) {
+        die("Anda tidak memiliki akses untuk melihat rapor siswa ini");
+    }
+}
+
+// Ambil data siswa
+$query_siswa = "SELECT s.*, r.nama_rombel, j.nama_jurusan, case when r.tingkat = 'X' then 'E' else 'F' end as fase,
+                (SELECT nama_lengkap FROM users WHERE id_user = r.id_wali_kelas) as wali_kelas
+                FROM siswa s
+                INNER JOIN rombel r ON s.id_rombel = r.id_rombel
+                INNER JOIN jurusan j ON r.id_jurusan = j.id_jurusan
+                WHERE s.id_siswa = '$id_siswa'";
+$result_siswa = mysqli_query($conn, $query_siswa);
+$siswa = mysqli_fetch_assoc($result_siswa);
+
+if(!$siswa) {
+    die("Data siswa tidak ditemukan");
+}
+
+// Ambil data semester
+$semester_info = '';
+$tahun_ajaran = '';
+$jenis_semester = 'GANJIL';
+if($id_semester) {
+    $query_semester = "SELECT * FROM semester WHERE id_semester = '$id_semester'";
+    $result_semester = mysqli_query($conn, $query_semester);
+    $semester_data = mysqli_fetch_assoc($result_semester);
+    if($semester_data) {
+        $semester_info = $semester_data['nama_semester'];
+        $tahun_ajaran = $semester_data['tahun_ajaran'];
+        $jenis_semester = strtoupper($semester_data['semester']);
+    }
+}
+
+// Ambil semua mata pelajaran di rombel siswa dengan nilai formatif dan STS
+$query_nilai = "SELECT DISTINCT m.nama_mapel, m.kelompok, 
+                n.nilai_formatif_1, n.nilai_formatif_2, n.nilai_formatif_3, n.nilai_formatif_4, n.nilai_sts
+                FROM mapel_guru mg
+                INNER JOIN mata_pelajaran m ON mg.id_mapel = m.id_mapel
+                LEFT JOIN nilai n ON n.id_mapel = m.id_mapel AND n.id_siswa = '$id_siswa' AND n.id_semester = mg.id_semester
+                WHERE mg.id_rombel = '{$siswa['id_rombel']}' AND mg.id_semester = '$id_semester'
+                ORDER BY m.kelompok, m.urutan, m.nama_mapel";
+$result_nilai = mysqli_query($conn, $query_nilai);
+
+// Ambil data rapor tambahan
+$query_rapor = "SELECT * FROM rapor_tambahan WHERE id_siswa = '$id_siswa' AND id_semester = '$id_semester'";
+$result_rapor = mysqli_query($conn, $query_rapor);
+$rapor_tambahan = mysqli_fetch_assoc($result_rapor);
+
+// Ambil data ekstrakurikuler
+$query_ekskul = "SELECT * FROM rapor_ekstrakurikuler WHERE id_siswa = '$id_siswa' AND id_semester = '$id_semester' ORDER BY id_ekstrakurikuler";
+$result_ekskul = mysqli_query($conn, $query_ekskul);
+
+function formatNilaiSTS_PDF($val) {
+    if ($val === null || $val === '' || !is_numeric($val)) {
+        return '-';
+    }
+    $num = (float)$val;
+    return (floor($num) == $num) ? number_format($num, 0) : number_format($num, 2);
+}
+
+// Buat PDF
+class PDF extends FPDF
+{
+    function Header()
+    {
+    }
+    
+    function Footer()
+    {
+    }
+    
+    function NbLines($w, $txt)
+    {
+        $cw = &$this->CurrentFont['cw'];
+        if($w == 0)
+            $w = $this->w - $this->rMargin - $this->x;
+        $wmax = ($w - 2 * $this->cMargin) * 1000 / $this->FontSize;
+        $s = str_replace("\r", '', $txt);
+        $nb = strlen($s);
+        if($nb > 0 && $s[$nb-1] == "\n")
+            $nb--;
+        $sep = -1;
+        $i = 0;
+        $j = 0;
+        $l = 0;
+        $nl = 1;
+        while($i < $nb)
+        {
+            $c = $s[$i];
+            if($c == "\n")
+            {
+                $i++;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+                continue;
+            }
+            if($c == ' ')
+                $sep = $i;
+            $l += $cw[$c];
+            if($l > $wmax)
+            {
+                if($sep == -1)
+                {
+                    if($i == $j)
+                        $i++;
+                }
+                else
+                    $i = $sep + 1;
+                $sep = -1;
+                $j = $i;
+                $l = 0;
+                $nl++;
+            }
+            else
+                $i++;
+        }
+        return $nl;
+    }
+}
+
+$pdf = new PDF();
+$pdf->AddPage();
+$pdf->SetMargins(10, 10, 10);
+$pdf->SetAutoPageBreak(true, 10);
+$pdf->SetLineWidth(0.3);
+
+// Header
+$pdf->SetFont('Arial', 'B', 13);
+$pdf->Cell(0, 7, 'LAPORAN HASIL BELAJAR', 0, 1, 'C');
+$pdf->SetFont('Arial', 'B', 11);
+$pdf->Cell(0, 6, 'PENILAIAN TENGAH SEMESTER ' . $jenis_semester, 0, 1, 'C');
+$pdf->Cell(0, 6, 'TAHUN PELAJARAN ' . $tahun_ajaran, 0, 1, 'C');
+$pdf->Ln(2);
+$pdf->SetLineWidth(0.8);
+$pdf->Line(15, $pdf->GetY(), 195, $pdf->GetY());
+$pdf->Ln(5);
+
+// Info Siswa
+$pdf->SetFont('Arial', '', 9);
+
+// Kolom kiri
+$y_start = $pdf->GetY();
+$x_left = 15;
+$x_right = 110;
+
+// Nama Murid
+$pdf->SetXY($x_left, $y_start);
+$pdf->Cell(28, 5, 'Nama Murid', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->MultiCell(62, 5, $siswa['nama_lengkap'], 0, 'L');
+
+// NISN
+$pdf->SetX($x_left);
+$pdf->Cell(28, 5, 'NISN', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->Cell(62, 5, $siswa['nis'], 0, 1);
+
+// Sekolah
+$pdf->SetX($x_left);
+$pdf->Cell(28, 5, 'Sekolah', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->MultiCell(62, 5, 'SMK MUHAMMADIYAH 8 PAKIS', 0, 'L');
+
+// Alamat
+$pdf->SetX($x_left);
+$pdf->Cell(28, 5, 'Alamat', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->MultiCell(62, 5, 'JL RAYA SUMBERPASIR NO 188', 0, 'L');
+
+$y_left_end = $pdf->GetY();
+
+// Kolom kanan
+$pdf->SetXY($x_right, $y_start);
+$pdf->Cell(28, 5, 'Kelas', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->Cell(52, 5, $siswa['nama_rombel'], 0, 1);
+
+$pdf->SetX($x_right);
+$pdf->Cell(28, 5, 'Fase', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->Cell(52, 5, $siswa['fase'] ?: '-', 0, 1);
+
+$pdf->SetX($x_right);
+$pdf->Cell(28, 5, 'Semester', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->MultiCell(52, 5, $semester_info ?: '-', 0, 'L');
+
+$pdf->SetX($x_right);
+$pdf->Cell(28, 5, 'Tahun Ajaran', 0, 0);
+$pdf->Cell(3, 5, ':', 0, 0);
+$pdf->Cell(52, 5, $tahun_ajaran ?: '-', 0, 1);
+
+$y_right_end = $pdf->GetY();
+
+$pdf->SetY(max($y_left_end, $y_right_end));
+$pdf->Ln(3);
+
+// Tabel Nilai STS
+// Header bertingkat: Nilai Formatif (F1-F4)
+$x_th = $pdf->GetX();
+$y_th = $pdf->GetY();
+
+$pdf->SetFont('Arial', 'B', 9);
+$pdf->Cell(10, 10, 'No.', 1, 0, 'C');
+$pdf->Cell(75, 10, 'Mata Pelajaran', 1, 0, 'C');
+$pdf->Cell(60, 5, 'Nilai Formatif', 1, 0, 'C');
+$pdf->Cell(15, 10, 'STS', 1, 0, 'C');
+$pdf->Cell(20, 10, 'Rata2', 1, 0, 'C');
+
+// Baris kedua untuk F1-F4
+$pdf->SetXY($x_th + 10 + 75, $y_th + 5);
+$pdf->Cell(15, 5, 'F1', 1, 0, 'C');
+$pdf->Cell(15, 5, 'F2', 1, 0, 'C');
+$pdf->Cell(15, 5, 'F3', 1, 0, 'C');
+$pdf->Cell(15, 5, 'F4', 1, 0, 'C');
+
+$pdf->SetXY($x_th, $y_th + 10);
+
+$pdf->SetFont('Arial', '', 9);
+$no = 1;
+$kelompok = "";
+
+while($nilai = mysqli_fetch_assoc($result_nilai)) {
+    // Header kelompok
+    if($kelompok != $nilai['kelompok']) {
+        $kelompok = $nilai['kelompok'];
+        if ($kelompok == 'A') {
+            $kelompok_nama = 'Kelompok Mata Pelajaran Umum';
+        } elseif ($kelompok == 'B') {
+            $kelompok_nama = 'Kelompok Mata Pelajaran Kejuruan';
+        } else {
+            $kelompok_nama = 'Muatan Lokal';
+        }
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->SetFillColor(200, 200, 200);
+        $pdf->Cell(180, 6, $kelompok_nama, 1, 1, 'L', true);
+        $pdf->SetFont('Arial', '', 9);
+    }
+    
+    // Hitung rata2 STS
+    $params = [
+        $nilai['nilai_formatif_1'],
+        $nilai['nilai_formatif_2'],
+        $nilai['nilai_formatif_3'],
+        $nilai['nilai_formatif_4'],
+        $nilai['nilai_sts']
+    ];
+    $valid_params = array_filter($params, function($v) {
+        return $v !== null && $v !== '';
+    });
+    $rata2 = count($valid_params) > 0 ? number_format(array_sum($valid_params) / count($valid_params), 2) : '-';
+    
+    // Hitung tinggi baris berdasarkan nama mapel
+    $nb_mapel = $pdf->NbLines(75, $nilai['nama_mapel']);
+    $h = max(6, 5 * $nb_mapel);
+    
+    $x = $pdf->GetX();
+    $y = $pdf->GetY();
+    
+    // Check page break
+    if ($y + $h > 275) {
+        $pdf->AddPage();
+        $x = $pdf->GetX();
+        $y = $pdf->GetY();
+    }
+    
+    // No
+    $pdf->Cell(10, $h, $no++, 1, 0, 'C');
+    
+    // Mata Pelajaran (MultiCell)
+    $x_after_no = $pdf->GetX();
+    $pdf->MultiCell(75, ($h / $nb_mapel), $nilai['nama_mapel'], 1, 'L');
+    
+    // Kolom Nilai
+    $pdf->SetXY($x_after_no + 75, $y);
+    $pdf->Cell(15, $h, formatNilaiSTS_PDF($nilai['nilai_formatif_1']), 1, 0, 'C');
+    $pdf->Cell(15, $h, formatNilaiSTS_PDF($nilai['nilai_formatif_2']), 1, 0, 'C');
+    $pdf->Cell(15, $h, formatNilaiSTS_PDF($nilai['nilai_formatif_3']), 1, 0, 'C');
+    $pdf->Cell(15, $h, formatNilaiSTS_PDF($nilai['nilai_formatif_4']), 1, 0, 'C');
+    $pdf->Cell(15, $h, formatNilaiSTS_PDF($nilai['nilai_sts']), 1, 0, 'C');
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->Cell(20, $h, $rata2, 1, 1, 'C');
+    $pdf->SetFont('Arial', '', 9);
+}
+
+$pdf->Ln(3);
+
+// Kokurikuler
+$pdf->SetFont('Arial', 'B', 9);
+$pdf->Cell(180, 6, 'Kokurikuler', 1, 1, 'C', true);
+$pdf->SetFont('Arial', '', 9);
+$kokurikuler = $rapor_tambahan && !empty($rapor_tambahan['deskripsi_kokurikuler']) ? 
+               $rapor_tambahan['deskripsi_kokurikuler'] : 'Belum ada deskripsi kokurikuler.';
+$pdf->MultiCell(180, 5, $kokurikuler, 1);
+
+$pdf->Ln(2);
+
+// Ekstrakurikuler
+$pdf->SetFont('Arial', 'B', 9);
+$pdf->Cell(10, 6, 'No.', 1, 0, 'C');
+$pdf->Cell(70, 6, 'Ekstrakurikuler', 1, 0, 'C');
+$pdf->Cell(100, 6, 'Keterangan', 1, 1, 'C');
+
+$pdf->SetFont('Arial', '', 9);
+$no_ekskul = 1;
+if(mysqli_num_rows($result_ekskul) > 0) {
+    while($ekskul = mysqli_fetch_assoc($result_ekskul)) {
+        $pdf->Cell(10, 6, $no_ekskul++, 1, 0, 'C');
+        $pdf->Cell(70, 6, $ekskul['nama_ekstrakurikuler'], 1, 0, 'L');
+        $pdf->Cell(100, 6, $ekskul['keterangan'], 1, 1, 'L');
+    }
+} else {
+    $pdf->SetFont('Arial', 'I', 9);
+    $pdf->Cell(180, 6, 'Belum ada data ekstrakurikuler', 1, 1, 'C');
+}
+
+$pdf->Ln(3);
+
+// Ketidakhadiran dan Catatan
+$pdf->SetFont('Arial', 'B', 9);
+$pdf->Cell(90, 6, 'Ketidakhadiran', 0, 0);
+$pdf->Cell(90, 6, 'Catatan Wali Kelas', 0, 1);
+
+$pdf->SetFont('Arial', '', 9);
+$y_start = $pdf->GetY();
+
+// Ketidakhadiran
+$pdf->Cell(45, 6, 'Sakit', 1);
+$pdf->Cell(45, 6, ($rapor_tambahan ? $rapor_tambahan['sakit'] : '0') . ' hari', 1, 1, 'C');
+$pdf->Cell(45, 6, 'Izin', 1);
+$pdf->Cell(45, 6, ($rapor_tambahan ? $rapor_tambahan['izin'] : '0') . ' hari', 1, 1, 'C');
+$pdf->Cell(45, 6, 'Tanpa Keterangan', 1);
+$pdf->Cell(45, 6, ($rapor_tambahan ? $rapor_tambahan['tanpa_keterangan'] : '0') . ' hari', 1, 1, 'C');
+
+$y_kehadiran = $pdf->GetY();
+
+// Catatan Wali Kelas
+$pdf->SetY($y_start);
+$pdf->SetX(105);
+$catatan = $rapor_tambahan && !empty($rapor_tambahan['catatan_wali_kelas']) ? 
+           $rapor_tambahan['catatan_wali_kelas'] : 'Belum ada catatan dari wali kelas.';
+$pdf->MultiCell(90, 5, $catatan, 1);
+
+$y_catatan = $pdf->GetY();
+$pdf->SetY(max($y_kehadiran, $y_catatan));
+
+$pdf->Ln(3);
+
+// Tanggapan Orang Tua
+$pdf->SetFont('Arial', 'B', 9);
+$pdf->Cell(180, 6, 'Tanggapan Orang Tua/Wali Murid', 1, 1, 'C', true);
+$pdf->SetFont('Arial', '', 9);
+$pdf->Cell(180, 15, '', 1, 1);
+
+$pdf->Ln(3);
+
+// Tanda Tangan
+$pdf->SetFont('Arial', '', 9);
+$pdf->Cell(60, 5, '', 0, 0);
+$pdf->Cell(60, 5, '', 0, 0);
+$pdf->Cell(60, 5, 'Malang, .................. ' . date('Y'), 0, 1, 'C');
+
+$pdf->Ln(2);
+
+$pdf->Cell(60, 5, 'Orang Tua Murid', 0, 0, 'C');
+$pdf->Cell(60, 5, 'Kepala Sekolah', 0, 0, 'C');
+$pdf->Cell(60, 5, 'Wali Kelas', 0, 1, 'C');
+
+$pdf->Ln(20);
+
+$pdf->Cell(60, 5, '____________________', 0, 0, 'C');
+$pdf->Cell(60, 5, '____________________', 0, 0, 'C');
+$pdf->Cell(60, 5, '____________________', 0, 1, 'C');
+
+// Output PDF
+$filename = 'Rapor_STS_' . preg_replace("/[^a-zA-Z0-9]/", "_", $siswa['nama_lengkap']) . '_' . 
+            preg_replace("/[^a-zA-Z0-9]/", "_", $semester_info) . '.pdf';
+$pdf->Output('D', $filename);

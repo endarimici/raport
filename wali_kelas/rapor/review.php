@@ -292,6 +292,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                 <button type="submit" name="submit" class="btn btn-primary">💾 Simpan Data Rapor</button>
                                 <a href="index.php?semester=<?php echo $id_semester; ?>" class="btn btn-secondary">← Kembali</a>
                                 <a href="preview.php?id=<?php echo $id_siswa; ?>&semester=<?php echo $id_semester; ?>" class="btn btn-success" target="_blank">👁️ Preview Rapor</a>
+                                <a href="preview_sts.php?id=<?php echo $id_siswa; ?>&semester=<?php echo $id_semester; ?>" class="btn btn-info" target="_blank" style="background-color: #009688; color: white;">👁️ Preview Rapor STS</a>
                             </div>
                         </form>
                     </div>
